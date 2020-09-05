@@ -25,3 +25,7 @@ for j in range(0,3):
         if str(np.nanmean(test_arr[0])) == "nan":
             break
         print(i+1)
+
+
+test_name = "G:/Processed/processed_existing/VH_overlap\S1A__IW___A_20171028T165948_VH_grd_mli_norm_geo_db_overlap.tif"
+print(test_name[12:len(test_name)])
