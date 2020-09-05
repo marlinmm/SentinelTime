@@ -5,7 +5,7 @@ import rasterio.mask
 import numpy as np
 
 
-def extract_files_to_list(path_to_folder, datatype):
+def extract_files_to_list(path_to_folder, datatype, path_bool):
     """
     finds all .tif-files in the corresponding directory
     :return:
@@ -13,7 +13,10 @@ def extract_files_to_list(path_to_folder, datatype):
     new_list = []
     for filename in os.listdir(path_to_folder):
         if filename.endswith(datatype):
-            new_list.append(os.path.join(path_to_folder, filename))
+            if path_bool:
+                new_list.append(os.path.join(path_to_folder, filename))
+            else:
+                new_list.append(filename)
         else:
             continue
     return new_list
@@ -49,10 +52,10 @@ def eliminate_nanoverlap(sen_directory, shape_path):
         buffer = {"type": "Polygon", "coordinates": buffer_coord}
         buffer_list.append(buffer)
 
-    file_list = extract_files_to_list(path_to_folder=sen_directory, datatype=".tif")
+    file_list = extract_files_to_list(path_to_folder=sen_directory, datatype=".tif", path_bool=False)
 
     for i, files in enumerate(file_list):
-        src1 = rio.open(file_list[i])
+        src1 = rio.open(sen_directory + file_list[i])
         test_bool = 0
         for j, polygons in enumerate(buffer_list):
             try:
@@ -65,5 +68,7 @@ def eliminate_nanoverlap(sen_directory, shape_path):
                 pass
         src1.close()
         if test_bool == 4:
-            os.rename(file_list[i], file_list[i][0:len(file_list[i])-4] + "_overlap.tif")
-            # os.rename(file_list[i], file_list[i][0:len(file_list[i]) - 12] + ".tif")
+            # os.rename(sen_directory + file_list[i], sen_directory + file_list[i][0:len(file_list[i])-4] + "_overlap.tif")
+            # os.rename(sen_directory + file_list[i], sen_directory + file_list[i][0:len(file_list[i]) - 12] + ".tif")
+            # print(file_list[i])
+            os.rename(sen_directory + file_list[i], sen_directory + file_list[i][10:len(file_list[i])])
