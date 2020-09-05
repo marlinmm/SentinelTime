@@ -29,31 +29,32 @@ def import_polygons(shape_path):
     return shapes
 
 
-def create_shape_buffer(shape_path):
+def create_shape_buffer(shape_path, buffer_size):
     import_list = import_polygons(shape_path=shape_path)
-
+    buffer_size = buffer_size/2
     buffer_list = []
     for i in range(0, len(import_list[0]["coordinates"][0])-1):
         lon = import_list[0]["coordinates"][0][i][0]
         lat = import_list[0]["coordinates"][0][i][1]
-        upper_left = (lon - 100, lat + 100)
-        upper_right = (lon + 100, lat + 100)
-        lower_left = (lon - 100, lat - 100)
-        lower_right = (lon + 100, lat - 100)
+        upper_left = (lon - buffer_size, lat + buffer_size)
+        upper_right = (lon + buffer_size, lat + buffer_size)
+        lower_left = (lon - buffer_size, lat - buffer_size)
+        lower_right = (lon + buffer_size, lat - buffer_size)
         buffer_coord = [[upper_left, upper_right, lower_right, lower_left, upper_left]]
         buffer = {"type": "Polygon", "coordinates": buffer_coord}
         buffer_list.append(buffer)
     return buffer_list
 
 
-def create_point_buffer(point_path):
+def create_point_buffer(point_path, buffer_size):
     """
 
     :param point_path:
+    :param buffer_size:
     :return:
     """
     import_list = import_polygons(shape_path=point_path)
-
+    buffer_size = buffer_size / 2
     buffer_list = []
     print(len(import_list))
     print(import_list)
@@ -62,10 +63,10 @@ def create_point_buffer(point_path):
         lon = import_list[i]["coordinates"][0]
         lat = import_list[i]["coordinates"][1]
         print(lon)
-        upper_left = (lon - 100, lat + 100)
-        upper_right = (lon + 100, lat + 100)
-        lower_left = (lon - 100, lat - 100)
-        lower_right = (lon + 100, lat - 100)
+        upper_left = (lon - buffer_size, lat + buffer_size)
+        upper_right = (lon + buffer_size, lat + buffer_size)
+        lower_left = (lon - buffer_size, lat - buffer_size)
+        lower_right = (lon + buffer_size, lat - buffer_size)
         buffer_coord = [[upper_left, upper_right, lower_right, lower_left, upper_left]]
         buffer = {"type": "Polygon", "coordinates": buffer_coord}
         buffer_list.append(buffer)
