@@ -8,6 +8,6 @@ Tool for extracting time series from SAR space time cubes
 * export time series for the classes as csv or whatever
     * automatic naming based on input shapefile
     * add dates of aquisition as well
-* date extraction function
+   * ~~date extraction function~~
 * statistical analysis
  
