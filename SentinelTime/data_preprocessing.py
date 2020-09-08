@@ -56,13 +56,9 @@ def create_point_buffer(point_path, buffer_size):
     import_list = import_polygons(shape_path=point_path)
     buffer_size = buffer_size / 2
     buffer_list = []
-    print(len(import_list))
-    print(import_list)
-    print(import_list[1]["coordinates"])
     for i in range(0, len(import_list)):
         lon = import_list[i]["coordinates"][0]
         lat = import_list[i]["coordinates"][1]
-        print(lon)
         upper_left = (lon - buffer_size, lat + buffer_size)
         upper_right = (lon + buffer_size, lat + buffer_size)
         lower_left = (lon - buffer_size, lat - buffer_size)
@@ -70,7 +66,6 @@ def create_point_buffer(point_path, buffer_size):
         buffer_coord = [[upper_left, upper_right, lower_right, lower_left, upper_left]]
         buffer = {"type": "Polygon", "coordinates": buffer_coord}
         buffer_list.append(buffer)
-    print(buffer_list)
     return buffer_list
 
 
