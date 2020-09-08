@@ -20,8 +20,8 @@ def main():
     # mask_tif(shape_path=shape_path, sen_directory=VH_asc)
     # raster_stack(sen_directory=VH_asc)
     # create_point_buffer(point_path=point_path, buffer_size=100)
-    extract_time_series(layer_stack=layer_stack, point_path=point_path, buffer_size=100)
-
+    # extract_time_series(layer_stack=layer_stack, point_path=point_path, buffer_size=100)
+    extract_dates(sen_directory=VH_asc)
 
 if __name__ == '__main__':
     main()

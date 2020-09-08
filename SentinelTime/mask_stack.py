@@ -54,6 +54,19 @@ def raster_stack(sen_directory):
                 dst.write_band(id, src1.read(1))
 
 
+def extract_dates(sen_directory):
+    """
+
+    :param sen_directory:
+    :return:
+    """
+    file_list = extract_files_to_list(path_to_folder=sen_directory + "masked/", datatype=".tif", path_bool=False)
+    date_list = []
+    for file in file_list:
+        date_list.append(str(file[2:6] + "-" + file[6:8] + "-" + file[8:10]))
+    return date_list
+
+
 def extract_time_series(layer_stack, point_path, buffer_size):
     """
 
