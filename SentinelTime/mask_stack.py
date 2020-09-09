@@ -4,53 +4,90 @@ import rasterio.plot
 from SentinelTime.data_preprocessing import *
 
 
-def mask_tif(shape_path, sen_directory):
+def mask_tif(shape_path, main_dir, results_dir):
     """
 
     :param shape_path:
     :param sen_directory:
     :return:
     """
-    file_list = extract_files_to_list(path_to_folder=sen_directory, datatype=".tif", path_bool=True)
-    file_name_list = extract_files_to_list(path_to_folder=sen_directory, datatype=".tif", path_bool=False)
-    shapes = import_polygons(shape_path=shape_path)
-    masked_folder = sen_directory + "masked/"
-    if os.path.exists(masked_folder):
-        shutil.rmtree(masked_folder)
-    os.mkdir(masked_folder)
+    file_name_list, path_list = eliminate_nanoverlap(main_dir, shape_path)
+    shapes = import_polygons(shape_path)
 
-    for i, files in enumerate(file_list):
-        src1 = rio.open(file_list[i])
+    print("Cliping overlapping files to ROI...")
+
+    VH_folder = results_dir + "VH/"
+    VH_Asc_folder = VH_folder + "Asc/"
+    VH_Desc_folder = VH_folder + "Desc/"
+    if not os.path.exists(VH_folder):
+        os.mkdir(VH_folder)
+        os.mkdir(VH_Asc_folder)
+        os.mkdir(VH_Desc_folder)
+
+    VV_folder = results_dir + "VV/"
+    VV_Asc_folder = VV_folder + "Asc/"
+    VV_Desc_folder = VV_folder + "Desc/"
+    if not os.path.exists(VV_folder):
+        os.mkdir(VV_folder)
+        os.mkdir(VV_Asc_folder)
+        os.mkdir(VV_Desc_folder)
+
+    for i, files in enumerate(file_name_list):
+        file_name = path_list[i] + file_name_list[i]
+        src1 = rio.open(file_name)
         out_image, out_transform = rio.mask.mask(src1, [shapes[0]], all_touched=0, crop=True, nodata=np.nan)
         out_meta = src1.meta
         out_meta.update({"driver": "GTiff",
                          "height": out_image.shape[1],
                          "width": out_image.shape[2],
                          "transform": out_transform})
-        with rasterio.open(
-                masked_folder + file_name_list[i][0:len(file_name_list)-4] + "_masked.tif", "w", **out_meta) as dest:
-            dest.write(out_image)
+
+        flight_dir = file_name_list[i][file_name_list[i].index("___") + 3:file_name_list[i].index("___") + 4]
+        polarization = file_name_list[i][file_name_list[i].index("grd") - 3:file_name_list[i].index("grd") - 1]
+        if polarization == "VH":
+            if flight_dir == "A":
+                with rasterio.open(
+                        VH_Asc_folder + file_name_list[i][10:len(file_name_list[i])], "w", **out_meta) as dest:
+                    dest.write(out_image)
+            if flight_dir == "D":
+                with rasterio.open(
+                        VH_Desc_folder + file_name_list[i][10:len(file_name_list[i])], "w", **out_meta) as dest:
+                    dest.write(out_image)
+        if polarization == "VV":
+            if flight_dir == "A":
+                with rasterio.open(
+                        VV_Asc_folder + file_name_list[i][10:len(file_name_list[i])], "w", **out_meta) as dest:
+                    dest.write(out_image)
+            if flight_dir == "D":
+                with rasterio.open(
+                        VV_Desc_folder + file_name_list[i][10:len(file_name_list[i])], "w", **out_meta) as dest:
+                    dest.write(out_image)
+    return [VH_Asc_folder, VH_Desc_folder, VV_Asc_folder, VV_Desc_folder]
 
 
-def raster_stack(sen_directory):
+def raster_stack(shape_path, main_dir, results_dir):
     """
     :param sen_directory:
     :return:
     """
-    file_list = extract_files_to_list(path_to_folder=sen_directory + "masked/", datatype=".tif", path_bool=True)
+    result_folder = mask_tif(shape_path, main_dir, results_dir)
+    print("Creating time series stack...")
 
-    # Read metadata of first file
-    with rasterio.open(file_list[0]) as src0:
-        meta = src0.meta
+    for folder in result_folder:
+        file_list = extract_files_to_list(path_to_folder=folder, datatype=".tif", path_bool=True)
 
-    # Update meta to reflect the number of layers
-    meta.update(count=len(file_list))
+        # Read metadata of first file
+        with rasterio.open(file_list[0]) as src0:
+            meta = src0.meta
 
-    # Read each layer and write it to stack
-    with rasterio.open(sen_directory + 'AAA_stack.tif', 'w', **meta) as dst:
-        for id, layer in enumerate(file_list, start=1):
-            with rasterio.open(layer) as src1:
-                dst.write_band(id, src1.read(1))
+        # Update meta to reflect the number of layers
+        meta.update(count=len(file_list))
+
+        # Read each layer and write it to stack
+        with rasterio.open(folder + '_AAA_stack.tif', 'w', **meta) as dst:
+            for id, layer in enumerate(file_list, start=1):
+                with rasterio.open(layer) as src1:
+                    dst.write_band(id, src1.read(1))
 
 
 def extract_dates(sen_directory):
@@ -114,5 +151,3 @@ def plot_test(layer_stack, point_path, buffer_size, sen_directory):
         dates.append(elem[0])
     plt.plot(time_mean)
     plt.show()
-
-
