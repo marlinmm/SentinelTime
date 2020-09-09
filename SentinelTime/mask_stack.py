@@ -8,7 +8,8 @@ def mask_tif(shape_path, main_dir, results_dir):
     """
 
     :param shape_path:
-    :param sen_directory:
+    :param main_dir:
+    :param results_dir:
     :return:
     """
     file_name_list, path_list = eliminate_nanoverlap(main_dir, shape_path)
@@ -32,8 +33,20 @@ def mask_tif(shape_path, main_dir, results_dir):
         os.mkdir(VV_Asc_folder)
         os.mkdir(VV_Desc_folder)
 
-    for i, files in enumerate(file_name_list):
+
+
+    for i, file in enumerate(file_name_list):
         file_name = path_list[i] + file_name_list[i]
+
+        if os.path.exists(VH_Asc_folder + file[10:len(file)]):
+            continue
+        if os.path.exists(VH_Desc_folder + file[10:len(file)]):
+            continue
+        if os.path.exists(VV_Asc_folder + file[10:len(file)]):
+            continue
+        if os.path.exists(VV_Desc_folder + file[10:len(file)]):
+            continue
+
         src1 = rio.open(file_name)
         out_image, out_transform = rio.mask.mask(src1, [shapes[0]], all_touched=0, crop=True, nodata=np.nan)
         out_meta = src1.meta
@@ -47,35 +60,38 @@ def mask_tif(shape_path, main_dir, results_dir):
         if polarization == "VH":
             if flight_dir == "A":
                 with rasterio.open(
-                        VH_Asc_folder + file_name_list[i][10:len(file_name_list[i])], "w", **out_meta) as dest:
+                        VH_Asc_folder + file[10:len(file)], "w", **out_meta) as dest:
                     dest.write(out_image)
             if flight_dir == "D":
                 with rasterio.open(
-                        VH_Desc_folder + file_name_list[i][10:len(file_name_list[i])], "w", **out_meta) as dest:
+                        VH_Desc_folder + file[10:len(file)], "w", **out_meta) as dest:
                     dest.write(out_image)
         if polarization == "VV":
             if flight_dir == "A":
                 with rasterio.open(
-                        VV_Asc_folder + file_name_list[i][10:len(file_name_list[i])], "w", **out_meta) as dest:
+                        VV_Asc_folder + file[10:len(file)], "w", **out_meta) as dest:
                     dest.write(out_image)
             if flight_dir == "D":
                 with rasterio.open(
-                        VV_Desc_folder + file_name_list[i][10:len(file_name_list[i])], "w", **out_meta) as dest:
+                        VV_Desc_folder + file[10:len(file)], "w", **out_meta) as dest:
                     dest.write(out_image)
     return [VH_Asc_folder, VH_Desc_folder, VV_Asc_folder, VV_Desc_folder]
 
 
 def raster_stack(shape_path, main_dir, results_dir):
     """
-    :param sen_directory:
+
+    :param shape_path:
+    :param main_dir:
+    :param results_dir:
     :return:
     """
+
     result_folder = mask_tif(shape_path, main_dir, results_dir)
     print("Creating time series stack...")
 
     for folder in result_folder:
         file_list = extract_files_to_list(path_to_folder=folder, datatype=".tif", path_bool=True)
-
         # Read metadata of first file
         with rasterio.open(file_list[0]) as src0:
             meta = src0.meta
@@ -84,7 +100,20 @@ def raster_stack(shape_path, main_dir, results_dir):
         meta.update(count=len(file_list))
 
         # Read each layer and write it to stack
-        with rasterio.open(folder + '_AAA_stack.tif', 'w', **meta) as dst:
+        if "VH" in folder and "Asc" in folder:
+            stack_name = "VH_Asc_stack.tif"
+        if "VH" in folder and "Desc" in folder:
+            stack_name = "VH_Desc_stack.tif"
+        if "VV" in folder and "Asc" in folder:
+            stack_name = "VV_Asc_stack.tif"
+        if "VV" in folder and "Desc" in folder:
+            stack_name = "VV_Desc_stack.tif"
+
+        if os.path.exists(results_dir + stack_name):
+            print("File already exists")
+            continue
+
+        with rasterio.open(results_dir + stack_name, 'w', **meta) as dst:
             for id, layer in enumerate(file_list, start=1):
                 with rasterio.open(layer) as src1:
                     dst.write_band(id, src1.read(1))
