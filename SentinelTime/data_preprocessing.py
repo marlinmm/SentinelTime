@@ -24,16 +24,16 @@ def import_polygons(shape_path):
     """
     """
     active_shapefile = fiona.open(shape_path, "r")
-    for i in range(0,len(list(active_shapefile))):
+    for i in range(0, len(list(active_shapefile))):
         shapes = [feature["geometry"] for feature in active_shapefile]
     return shapes
 
 
 def create_shape_buffer(shape_path, buffer_size):
     import_list = import_polygons(shape_path=shape_path)
-    buffer_size = buffer_size/2
+    buffer_size = buffer_size / 2
     buffer_list = []
-    for i in range(0, len(import_list[0]["coordinates"][0])-1):
+    for i in range(0, len(import_list[0]["coordinates"][0]) - 1):
         lon = import_list[0]["coordinates"][0][i][0]
         lat = import_list[0]["coordinates"][0][i][1]
         upper_left = (lon - buffer_size, lat + buffer_size)
@@ -69,18 +69,21 @@ def create_point_buffer(point_path, buffer_size):
     return buffer_list
 
 
-def eliminate_nanoverlap(sen_directory, shape_path):
+def eliminate_nanoverlap(main_dir, shape_path):
     """
 
     :param sen_directory:
     :param shape_path:
     :return:
     """
-    buffer_list = create_shape_buffer(shape_path=shape_path)
-    file_list = extract_files_to_list(path_to_folder=sen_directory, datatype=".tif", path_bool=False)
+    buffer_list = create_shape_buffer(shape_path=shape_path, buffer_size=100)
+    file_list, path_list = create_overlap_file_list(path_to_folder=main_dir, datatype=".tif")
+    print("Creating list of all overlapping files...")
+    overlap_file_list = []
+    overlap_path_list = []
 
     for i, files in enumerate(file_list):
-        src1 = rio.open(sen_directory + file_list[i])
+        src1 = rio.open(path_list[i] + file_list[i])
         test_bool = 0
         for j, polygons in enumerate(buffer_list):
             try:
@@ -93,7 +96,21 @@ def eliminate_nanoverlap(sen_directory, shape_path):
                 pass
         src1.close()
         if test_bool == 4:
-            # os.rename(sen_directory + file_list[i], sen_directory + file_list[i][0:len(file_list[i])-4] + "_overlap.tif")
-            # os.rename(sen_directory + file_list[i], sen_directory + file_list[i][0:len(file_list[i]) - 12] + ".tif")
-            print(file_list[i])
-            # os.rename(sen_directory + file_list[i], sen_directory + file_list[i][10:len(file_list[i])])
+            overlap_file_list.append(file_list[i])
+            overlap_path_list.append(path_list[i])
+    return overlap_file_list, overlap_path_list
+
+
+def create_overlap_file_list(path_to_folder, datatype):
+    file_list = []
+    path_list = []
+    for filename in os.listdir(path_to_folder):
+        full_path = os.path.join(path_to_folder, filename)
+        if filename.endswith(datatype):
+            file_list.append(filename)
+            path_list.append(full_path[0:full_path.index("S1") - 1] + "/")
+        if os.path.isdir(full_path):
+            tmp1, tmp2 = create_overlap_file_list(full_path, datatype)
+            file_list = file_list + tmp1
+            path_list = path_list + tmp2
+    return file_list, path_list
