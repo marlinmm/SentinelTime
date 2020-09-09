@@ -27,8 +27,8 @@ for j in range(0,3):
         print(i+1)
 
 
-test_name = "G:/Processed/processed_existing/VH_overlap\S1A__IW___A_20171028T165948_VH_grd_mli_norm_geo_db_overlap.tif"
-print(test_name[12:len(test_name)])
+test_name = 'G:/Processed/test_folder/processed_existing_subset\\S1A__IW___A_20160705T165932_VH_grd_mli_norm_geo_db.tif'
+print(test_name[0:test_name.index("S1A")-1])
 
 
 
