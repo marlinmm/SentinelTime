@@ -10,4 +10,6 @@ Tool for extracting time series from SAR space time cubes
     * ~~add dates of aquisition as well~~
    * ~~date extraction function~~
 * statistical analysis
+* plots 
+    * make dates work in plots
  
