@@ -36,7 +36,7 @@ def extract_time_series(results_dir, point_path, buffer_size, export_bool):
         patch_mean = []
         for patch in patches:
             pixel_mean = []
-            out_image, out_transform = rio.mask.mask(src1, [patch], all_touched=0, crop=True, nodata=np.nan)
+            out_image, out_transform = rio.mask.mask(src1, [patch], all_touched=1, crop=True, nodata=np.nan)
             # print(np.shape(out_image))
             for pixel in out_image:
                 pixel_mean.append(np.nanmean(pixel))
@@ -91,4 +91,27 @@ def plot_test(layer_stack, point_path, buffer_size, sen_directory):
         time_mean.append(col_mean)
         dates.append(elem[0])
     plt.plot(time_mean)
+    plt.show()
+
+
+def import_csv(path_to_folder):
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    csv_list = extract_files_to_list(path_to_folder, datatype=".csv", path_bool=True)
+    print(csv_list)
+    df1 = pd.read_csv(csv_list[0])
+    df1 = df1.rename({"# date": "date"}, axis=1)
+    print(df1)
+
+    # df1["# date"] = pd.to_datetime(df1["# date"])
+    df1['date'] = pd.to_datetime(df1['date'], format='%Y%m%d')
+    print(df1)
+    df1["patches_mean"] = df1.mean(axis=1)
+    print(df1)
+
+    plt.plot('date', 'VH1', data=df1, marker='o', markerfacecolor='blue', markersize=12, color='skyblue', linewidth=4)
+    plt.plot('date', 'VH2', data=df1, marker='', color='olive', linewidth=2)
+    plt.plot('date', 'patches_mean', data=df1, marker='', color='olive', linewidth=2, linestyle='dashed', label="toto")
+
+    plt.legend()
     plt.show()

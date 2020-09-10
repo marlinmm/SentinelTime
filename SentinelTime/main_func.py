@@ -13,7 +13,7 @@ def main():
     shape_path = "G:/Shapes/Polygons/extend_of_points.shp"
 
     # Location of the point shapefile to extract data from timeseries with:
-    point_path = "G:/Shapes/Points/clc312_reproj.shp"
+    point_path = "G:/Shapes/Points/clc311_reproj.shp"
 
     layer_stack = "G:/Processed/results/VH_Asc_stack.tif"
 
@@ -34,6 +34,7 @@ def main():
 
     # plot_test(layer_stack=results_dir, point_path=point_path, buffer_size=100, sen_directory=VH_asc)
     # extract_dates(sen_directory=VH_asc)
+    # import_csv(path_to_folder=results_dir)
 
 
 if __name__ == '__main__':
