@@ -3,11 +3,9 @@ from SentinelTime.time_series import *
 
 
 def main():
+    ###################################     INPUT    ########################################
     # Main directory of original raster files:
     main_dir = "G:/Processed/original_data/"
-
-    # Create results folder outside of main_dir:
-    results_dir = "G:/Processed/results/"
 
     # Location of Shapefile to mask the ROI:
     shape_path = "G:/Shapes/Polygons/extend_of_points.shp"
@@ -15,26 +13,20 @@ def main():
     # Location of the point shapefile to extract data from timeseries with:
     point_path = "G:/Shapes/Points/clc311_reproj.shp"
 
-    layer_stack = "G:/Processed/results/VH_Asc_stack.tif"
+    ###################################     OUTPUT    ########################################
+    # Create results folder outside of main_dir:
+    results_dir = "G:/Processed/results/"
 
-#####------ NOT NEEDED ------#####
-    # eliminate_nanoverlap(sen_directory=sen_directory, shape_path=shape_path)
-    # eliminate_nanoverlap(main_dir=main_dir, shape_path=shape_path)
-    # mask_tif(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir)
-    # create_point_buffer(point_path=point_path, buffer_size=100)
-    # tmp1, tmp2 = create_overlap_file_list(path_to_folder=main_dir, datatype=".tif")
-#####------ NOT NEEDED ------#####
-
+    ########################### USER-DEPENDENT FUNCTIONS TO BE USED ##########################
+    # Creating a raster stack clipped to the extents of the specified shapefile:
     # raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir)
 
+    # Extract time series information based on point shapefiles with possibility to export information to csv file
+    # extract_time_series(results_dir=results_dir, point_path=point_path, buffer_size=100, export_bool=True)
 
-    # extract_time_series(layer_stack=layer_stack, point_path=point_path, buffer_size=100, sen_directory=VH_asc)
-
-    extract_time_series(results_dir=results_dir, point_path=point_path, buffer_size=100, export_bool=True)
-
-    # plot_test(layer_stack=results_dir, point_path=point_path, buffer_size=100, sen_directory=VH_asc)
-    # extract_dates(sen_directory=VH_asc)
-    # import_csv(path_to_folder=results_dir)
+    # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
+    # each class
+    temporal_statistics(path_to_folder=results_dir, plot_bool=True)
 
 
 if __name__ == '__main__':
