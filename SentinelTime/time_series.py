@@ -77,41 +77,52 @@ def extract_time_series(results_dir, point_path, buffer_size, export_bool):
     return patch_mean
 
 
-def plot_test(layer_stack, point_path, buffer_size, sen_directory):
-    import matplotlib.pyplot as plt
-
-    dataframe = extract_time_series(layer_stack=layer_stack, point_path=point_path, buffer_size=buffer_size,
-                                    sen_directory=sen_directory, export_bool=False)
-    time_mean = []
-    dates = []
-    for elem in dataframe:
-        # print(elem)
-        # print(len(elem))
-        col_mean = np.mean(elem[1:len(elem)])
-        time_mean.append(col_mean)
-        dates.append(elem[0])
-    plt.plot(time_mean)
-    plt.show()
-
-
 def import_csv(path_to_folder):
     import pandas as pd
+    csv_list = extract_files_to_list(path_to_folder, datatype=".csv", path_bool=False)
+    df_name_list = []
+    df_list = []
+    for csv in csv_list:
+        df = pd.read_csv(path_to_folder + csv)
+        df = df.rename({"# date": "date"}, axis=1)
+        df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
+        df_name_list.append(csv[0:len(csv)-4])
+        df_list.append(df)
+    return df_name_list, df_list
+
+
+def temporal_statistics(path_to_folder, plot_bool):
     import matplotlib.pyplot as plt
-    csv_list = extract_files_to_list(path_to_folder, datatype=".csv", path_bool=True)
-    print(csv_list)
-    df1 = pd.read_csv(csv_list[0])
-    df1 = df1.rename({"# date": "date"}, axis=1)
-    print(df1)
+    df_name_list, df_list = import_csv(path_to_folder)
+    statistics_dict = {}
+    for i, df in enumerate(df_list):
+        df["patches_mean"] = df.mean(axis=1)
+        statistics_dict[df_name_list[i]] = {"Temporal Mean": df["patches_mean"].mean()}
 
-    # df1["# date"] = pd.to_datetime(df1["# date"])
-    df1['date'] = pd.to_datetime(df1['date'], format='%Y%m%d')
-    print(df1)
-    df1["patches_mean"] = df1.mean(axis=1)
-    print(df1)
+        df["patches_std"] = df.std(axis=1)
+        statistics_dict[df_name_list[i]]["Temporal Stdev."] = df["patches_std"].mean()
 
-    plt.plot('date', 'VH1', data=df1, marker='o', markerfacecolor='blue', markersize=12, color='skyblue', linewidth=4)
-    plt.plot('date', 'VH2', data=df1, marker='', color='olive', linewidth=2)
-    plt.plot('date', 'patches_mean', data=df1, marker='', color='olive', linewidth=2, linestyle='dashed', label="toto")
+        statistics_dict[df_name_list[i]]["Temporal Max."] = df["patches_mean"].max()
+        statistics_dict[df_name_list[i]]["Temporal Min."] = df["patches_mean"].min()
+        statistics_dict[df_name_list[i]]["Temporal Amp."] = df["patches_mean"].max() - df["patches_mean"].min()
+    print(statistics_dict)
 
-    plt.legend()
-    plt.show()
+    if plot_bool:
+        tmp = 0
+        for j in range(0, int(len(df_name_list)/4)):
+            for k, elem in enumerate(["patches_mean", "patches_std"]):
+                if k == 0:
+                    plt.title('Mean of all Patches for class: ' + str(df_name_list[tmp][0:6]))
+                if k == 1:
+                    plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:6]))
+                plt.plot('date', elem, data=df_list[tmp+0], marker='', color='blue', linewidth=2,
+                         label=df_name_list[tmp+0])
+                plt.plot('date', elem, data=df_list[tmp+1], marker='', color='black', linewidth=2,
+                         label=df_name_list[tmp+1])
+                plt.plot('date', elem, data=df_list[tmp+2], marker='', color='green', linewidth=2,
+                         label=df_name_list[tmp+2])
+                plt.plot('date', elem, data=df_list[tmp+3], marker='', color='red', linewidth=2,
+                         label=df_name_list[tmp+3])
+                plt.legend()
+                plt.show()
+            tmp = tmp + 4
