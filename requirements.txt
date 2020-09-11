@@ -3,3 +3,5 @@ rasterio
 GDAL
 matplotlib
 numpy
+pandas
+setuptools
