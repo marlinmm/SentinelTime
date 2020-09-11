@@ -21,11 +21,11 @@ def main():
     # Creating a raster stack clipped to the extents of the specified shapefile:
     # raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir)
 
-    # Extract time series information based on point shapefiles with possibility to export information to csv file
+    # Extract time series information based on point shapefiles with possibility to export information to csv file:
     # extract_time_series(results_dir=results_dir, point_path=point_path, buffer_size=100, export_bool=True)
 
     # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
-    # each class
+    # each class:
     temporal_statistics(path_to_folder=results_dir, plot_bool=True)
 
 
