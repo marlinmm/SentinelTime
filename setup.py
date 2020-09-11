@@ -10,12 +10,12 @@ else:
     with open(os.path.join(directory, 'README.md')) as f:
         long_description = f.read()
 
-setup(name='BanDiTS',
+setup(name='SentinelTime',
       packages=find_packages(),
       include_package_data=True,
       setup_requires=['setuptools_scm'],
       use_scm_version=True,
-      description='Python script for processing Sentinel-3 and MODIS LST data',
+      description='Python script for preprocessing Sen-1 GRD data, creating time series and statistical analysis',
       classifiers=[
           'License :: FSF Approved :: MIT License',
           'Operating System :: Microsoft :: Windows',
@@ -24,14 +24,11 @@ setup(name='BanDiTS',
       install_requires=["fiona",
                         "rasterio",
                         "GDAL",
-                        "geopandas"
                         "matplotlib",
-                        "pathos",
-                        "scipy",
                         "numpy"],
       python_requires='>=3.6.0',
-      url='https://github.com/marlinmm/SenLAST.git',
-      author='Marlin Mueller', #'Jonas Ziemer'  # how to add second author?
+      url='https://github.com/marlinmm/SentinelTime.git',
+      author='Marlin Markus Mueller',
       author_email='marlin.markus.mueller@uni-jena.de',
       license='MIT',
       zip_safe=False,
