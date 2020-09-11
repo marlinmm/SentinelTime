@@ -27,3 +27,8 @@ If you have trouble installing _rasterio_, _fiona_ or the needed _GDAL_ package 
 .whl files directly from [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/).
 
 _Developed in Python 3.8_
+
+# TODO:
+* point shapefile import as a list
+* RVI oder VH/VV ratio
+* boxplots
