@@ -7,6 +7,11 @@ import numpy as np
 
 def extract_files_to_list(path_to_folder, datatype, path_bool):
     """
+
+    :param path_to_folder:
+    :param datatype:
+    :param path_bool:
+    :return:
     """
     new_list = []
     for filename in os.listdir(path_to_folder):
@@ -22,6 +27,9 @@ def extract_files_to_list(path_to_folder, datatype, path_bool):
 
 def import_polygons(shape_path):
     """
+
+    :param shape_path:
+    :return:
     """
     active_shapefile = fiona.open(shape_path, "r")
     for i in range(0, len(list(active_shapefile))):
@@ -30,6 +38,12 @@ def import_polygons(shape_path):
 
 
 def create_shape_buffer(shape_path, buffer_size):
+    """
+
+    :param shape_path:
+    :param buffer_size:
+    :return:
+    """
     import_list = import_polygons(shape_path=shape_path)
     buffer_size = buffer_size / 2
     buffer_list = []
@@ -72,7 +86,7 @@ def create_point_buffer(point_path, buffer_size):
 def eliminate_nanoverlap(main_dir, shape_path):
     """
 
-    :param sen_directory:
+    :param main_dir:
     :param shape_path:
     :return:
     """
@@ -102,6 +116,12 @@ def eliminate_nanoverlap(main_dir, shape_path):
 
 
 def create_overlap_file_list(path_to_folder, datatype):
+    """
+
+    :param path_to_folder:
+    :param datatype:
+    :return:
+    """
     file_list = []
     path_list = []
     for filename in os.listdir(path_to_folder):
