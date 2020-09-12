@@ -5,17 +5,24 @@ from SentinelTime.data_preprocessing import *
 
 def mask_tif(shape_path, main_dir, results_dir):
     """
-
-    :param shape_path:
-    :param main_dir:
-    :param results_dir:
-    :return:
+    Function to clip raster files with given polygon (ROI) to reduce file size
+    :param shape_path: string
+        Path to shapfile for ROI
+    :param main_dir: string
+        Path to main directory containing the original raster files or subdirectories containing the original raster
+        files
+    :param results_dir: string
+        Path to Output directory where results should be stored
+    :return: list
+        Returns list of directories, where the subsets for each polarization and flight direction are stored
     """
     file_name_list, path_list = eliminate_nanoverlap(main_dir, shape_path)
     shapes = import_polygons(shape_path)
 
+    # Print info, what step is currently processed:
     print("Cliping overlapping files to ROI...")
 
+    # Create necessary folder for the output:
     VH_folder = results_dir + "VH/"
     VH_Asc_folder = VH_folder + "Asc/"
     VH_Desc_folder = VH_folder + "Desc/"
@@ -32,6 +39,7 @@ def mask_tif(shape_path, main_dir, results_dir):
         os.mkdir(VV_Asc_folder)
         os.mkdir(VV_Desc_folder)
 
+    # Iterate through all files, which overlap with the ROI (return from "eliminate_nanoverlap" function)
     for i, file in enumerate(file_name_list):
         file_name = path_list[i] + file_name_list[i]
 
@@ -44,6 +52,7 @@ def mask_tif(shape_path, main_dir, results_dir):
         if os.path.exists(VV_Desc_folder + file[10:len(file)]):
             continue
 
+        # Clip files to extent of ROI:
         src1 = rio.open(file_name)
         out_image, out_transform = rio.mask.mask(src1, [shapes[0]], all_touched=0, crop=True, nodata=np.nan)
         out_meta = src1.meta
@@ -52,6 +61,7 @@ def mask_tif(shape_path, main_dir, results_dir):
                          "width": out_image.shape[2],
                          "transform": out_transform})
 
+        # Write subsets to corresponding folders and rename files to be sorted by date:
         flight_dir = file_name_list[i][file_name_list[i].index("___") + 3:file_name_list[i].index("___") + 4]
         polarization = file_name_list[i][file_name_list[i].index("grd") - 3:file_name_list[i].index("grd") - 1]
         if polarization == "VH":
@@ -75,13 +85,17 @@ def mask_tif(shape_path, main_dir, results_dir):
     return [VH_Asc_folder, VH_Desc_folder, VV_Asc_folder, VV_Desc_folder]
 
 
-def raster_stack(shape_path, main_dir, results_dir):
+def raster_stack(shape_path, main_dir, results_dir, overwrite):
     """
-
-    :param shape_path:
-    :param main_dir:
+    This function stacks the clipped raster files to one raster time series stack for each polarization and flight
+    direction
+    :param shape_path: string
+        Path to shapfile for ROI
+    :param main_dir: string
+        Path to main directory containing the original raster files or subdirectories containing the original raster
+        files
     :param results_dir:
-    :return:
+        Path to Output directory where results should be stored
     """
 
     result_folder = mask_tif(shape_path, main_dir, results_dir)
@@ -106,10 +120,13 @@ def raster_stack(shape_path, main_dir, results_dir):
         if "VV" in folder and "Desc" in folder:
             stack_name = "VV_Desc_stack.tif"
 
-        if os.path.exists(results_dir + stack_name):
-            print("File already exists")
-            continue
+        # Check if file already exists, and depending on overwrite decision, overwrite or tell user, that file exists
+        if not overwrite:
+            if os.path.exists(results_dir + stack_name):
+                print("File already exists")
+                continue
 
+        # Write rasterstacks for all polarizations and flight directions:
         with rasterio.open(results_dir + stack_name, 'w', **meta) as dst:
             for id, layer in enumerate(file_list, start=1):
                 with rasterio.open(layer) as src1:
