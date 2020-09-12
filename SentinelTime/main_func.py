@@ -4,13 +4,13 @@ from SentinelTime.time_series import *
 
 def main():
     ###################################     INPUT    ########################################
-    # Main directory of original raster files:
+    # Main directory of original raster files and/or subdirectories containing the original raster files:
     main_dir = "G:/Processed/original_data/"
 
-    # Location of Shapefile to mask the ROI:
+    # Location of Shapefile to mask the ROI (must be polygon shapefile, simple polygon shapes are faster!):
     shape_path = "G:/Shapes/Polygons/extend_of_points.shp"
 
-    # Location of the point shapefile to extract data from timeseries with:
+    # Location of the point shapefile to extract data from timeseries with (must be point shapefile!):
     point_path = "G:/Shapes/Points/"
 
     ###################################     OUTPUT    ########################################
