@@ -11,7 +11,7 @@ def main():
     shape_path = "G:/Shapes/Polygons/extend_of_points.shp"
 
     # Location of the point shapefile to extract data from timeseries with:
-    point_path = "G:/Shapes/Points/clc311_reproj.shp"
+    point_path = "G:/Shapes/Points/"
 
     ###################################     OUTPUT    ########################################
     # Create results folder outside of main_dir:
@@ -21,12 +21,14 @@ def main():
     # Creating a raster stack clipped to the extents of the specified shapefile:
     # raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir)
 
-    # Extract time series information based on point shapefiles with possibility to export information to csv file:
-    # extract_time_series(results_dir=results_dir, point_path=point_path, buffer_size=100)
+    # Extract time series information based on point shapefiles and export information to csv file:
+    point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
+    for shapefile in point_list:
+        extract_time_series(results_dir=results_dir, point_path=shapefile, buffer_size=100)
 
     # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
     # each class:
-    temporal_statistics(path_to_folder=results_dir, plot_bool=True)
+    # temporal_statistics(path_to_folder=results_dir, plot_bool=True)
 
 
 if __name__ == '__main__':
