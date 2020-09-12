@@ -110,7 +110,6 @@ def eliminate_nanoverlap(main_dir, shape_path):
     print("Creating list of all overlapping files...")
     overlap_file_list = []
     overlap_path_list = []
-    print(len(buffer_list))
 
     # Iterate through raster file list and import each file
     for i, files in enumerate(file_list):
