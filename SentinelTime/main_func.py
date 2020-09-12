@@ -19,7 +19,7 @@ def main():
 
     ########################### USER-DEPENDENT FUNCTIONS TO BE USED ##########################
     # Creating a raster stack clipped to the extents of the specified shapefile:
-    # raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir)
+    raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir, overwrite=False)
 
     # Extract time series information based on point shapefiles and export information to csv file:
     point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
@@ -28,7 +28,7 @@ def main():
 
     # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
     # each class:
-    # temporal_statistics(path_to_folder=results_dir, plot_bool=True)
+    temporal_statistics(path_to_folder=results_dir, plot_bool=True)
 
 
 if __name__ == '__main__':
