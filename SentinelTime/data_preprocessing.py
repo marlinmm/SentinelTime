@@ -7,11 +7,15 @@ import numpy as np
 
 def extract_files_to_list(path_to_folder, datatype, path_bool):
     """
-
-    :param path_to_folder:
-    :param datatype:
-    :param path_bool:
-    :return:
+    This functions checks a directory for all files of a certain dataype and returns a list of all found files
+    :param path_to_folder: string
+        Path to directory to be searched
+    :param datatype: string
+        Datatype of files to be searched
+    :param path_bool: boolean
+        append path to filename if set to TRUE, only filename if FALSE
+    :return: list
+        Contains paths to all files or all filenames in searched directory
     """
     new_list = []
     for filename in os.listdir(path_to_folder):
@@ -27,9 +31,11 @@ def extract_files_to_list(path_to_folder, datatype, path_bool):
 
 def import_polygons(shape_path):
     """
-
-    :param shape_path:
-    :return:
+    This function imports shapefile from given directory to python
+    :param shape_path: string
+        Path to shapefile
+    :return: list
+        Returns a list of all elements in shapefile
     """
     active_shapefile = fiona.open(shape_path, "r")
     for i in range(0, len(list(active_shapefile))):
@@ -39,10 +45,13 @@ def import_polygons(shape_path):
 
 def create_shape_buffer(shape_path, buffer_size):
     """
-
-    :param shape_path:
-    :param buffer_size:
-    :return:
+    This function creates a buffer around all vertex points of a given shapefile or polygon
+    :param shape_path: string
+        Path to the shapefile
+    :param buffer_size: int
+        Buffer size corresponds to the length of the square buffer around the vertex point
+    :return: list
+        Returns a list with buffered polygons around each vertex point of input polygon
     """
     import_list = import_polygons(shape_path=shape_path)
     buffer_size = buffer_size / 2
@@ -62,10 +71,13 @@ def create_shape_buffer(shape_path, buffer_size):
 
 def create_point_buffer(point_path, buffer_size):
     """
-
-    :param point_path:
-    :param buffer_size:
-    :return:
+    This function is similar to create_shape_buffer but works for point shapefiles
+    :param point_path: string
+        Path to the shapefile
+    :param buffer_size: int
+        Buffer size corresponds to the length of the square buffer around the vertex point
+    :return: list
+        Returns a list with buffered polygons around each point of input polygon
     """
     import_list = import_polygons(shape_path=point_path)
     buffer_size = buffer_size / 2
@@ -85,31 +97,42 @@ def create_point_buffer(point_path, buffer_size):
 
 def eliminate_nanoverlap(main_dir, shape_path):
     """
-
-    :param main_dir:
-    :param shape_path:
-    :return:
+    This function creates a list of all raster files which are fully contained within the given polygon
+    :param main_dir: string
+        Path to directory or subdirectories containing the input raster files
+    :param shape_path: string
+        Path to shapefile used to create the ROI
+    :return: tuple
+        Returns a tuple of 2 lists containing the overlapping filenames and corresponding paths
     """
     buffer_list = create_shape_buffer(shape_path=shape_path, buffer_size=100)
     file_list, path_list = create_overlap_file_list(path_to_folder=main_dir, datatype=".tif")
     print("Creating list of all overlapping files...")
     overlap_file_list = []
     overlap_path_list = []
+    print(len(buffer_list))
 
+    # Iterate through raster file list and import each file
     for i, files in enumerate(file_list):
         src1 = rio.open(path_list[i] + file_list[i])
-        test_bool = 0
+        # Counter to check, if all vertex points of given shapefile contain values
+        counter = 0
+
+        # Check, if raster file is contained within given polygon:
         for j, polygons in enumerate(buffer_list):
             try:
                 tmp = rio.mask.mask(src1, [buffer_list[j]], all_touched=0, crop=True, nodata=np.nan)
                 if str(np.nanmean(tmp[0])) == "nan":
                     break
-                test_bool += 1
+                # Increment counter by 1 if vertex point is covered by raster file
+                counter += 1
             except ValueError:
-                test_bool = 0
+                counter = 0
                 pass
         src1.close()
-        if test_bool == 4:
+
+        # If counter equals number of vertex points of shapefile, raster file is contained within polygon
+        if counter == len(buffer_list):
             overlap_file_list.append(file_list[i])
             overlap_path_list.append(path_list[i])
     return overlap_file_list, overlap_path_list
@@ -117,10 +140,13 @@ def eliminate_nanoverlap(main_dir, shape_path):
 
 def create_overlap_file_list(path_to_folder, datatype):
     """
-
-    :param path_to_folder:
-    :param datatype:
-    :return:
+    Similar function to extract_files_to_list, but also works for subdirectories
+    :param path_to_folder: string
+        Path to directory containing files or subdirectories of files
+    :param datatype: string
+        Datatype of files to be searched
+    :return: tuple
+        Returns tuple of lists containing paths to all files or all filenames in searched directory/directories
     """
     file_list = []
     path_list = []
