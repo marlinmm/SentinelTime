@@ -46,7 +46,7 @@ def extract_time_series(results_dir, point_path, buffer_size):
                 pixel_mean.append(np.nanmean(pixel))
             patch_mean.append(pixel_mean)
 
-        # Append dates of acquisition to each list:
+        # Append dates of acquisition to each list (will be stored as float, doesnt matter for processing):
         if "VH" in file and "Asc" in file:
             patch_mean.append(extract_dates(results_dir + "VH" + "/" + "Asc" + "/"))
         if "VH" in file and "Desc" in file:
@@ -63,23 +63,36 @@ def extract_time_series(results_dir, point_path, buffer_size):
         patch_mean = patch_mean.tolist()
         src1.close()
 
+        # Create CSV export directory and create header string with length equal to the number of patcher per class:
+        csv_result_dir = results_dir + "CSV/"
+        if not os.path.exists(csv_result_dir):
+            os.mkdir(csv_result_dir)
+        if "VH" in file:
+            pol1 = "VH"
+            vh_head_string = "VH"
+            tmp = ","
+            for i, elem in enumerate(patches):
+                vh_head_string = vh_head_string + str(i) + tmp + pol1
+        if "VV" in file:
+            pol1 = "VV"
+            vv_head_string = "VV"
+            tmp = ","
+            for i, elem in enumerate(patches):
+                vv_head_string = vv_head_string + str(i) + tmp + pol1
+
         # Export patch means to csv files for each class, polarization and flight direction:
         if "VH" in file and "Asc" in file:
-            np.savetxt(results_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VH_Asc.csv",
-                       patch_mean, delimiter=",", header="date,VH1,VH2,VH3,VH4,VH5,VH6,VH7,VH8,VH9,VH10,VH11,VH12,VH13,"
-                                                         "VH14,VH15,VH16,VH17,VH18,VH19,VH20", fmt='%f')
+            np.savetxt(csv_result_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VH_Asc.csv",
+                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string)-3], fmt='%f')
         if "VH" in file and "Desc" in file:
-            np.savetxt(results_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VH_Desc.csv",
-                       patch_mean, delimiter=",", header="date,VH1,VH2,VH3,VH4,VH5,VH6,VH7,VH8,VH9,VH10,VH11,VH12,VH13,"
-                                                         "VH14,VH15,VH16,VH17,VH18,VH19,VH20", fmt='%f')
+            np.savetxt(csv_result_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VH_Desc.csv",
+                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string)-3], fmt='%f')
         if "VV" in file and "Asc" in file:
-            np.savetxt(results_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VV_Asc.csv",
-                       patch_mean, delimiter=",", header="date,VV1,VV2,VV3,VV4,VV5,VV6,VV7,VV8,VV9,VV10,VV11,VV12,VV13,"
-                                                         "VV14,VV15,VV16,VV17,VV18,VV19,VV20", fmt='%f')
+            np.savetxt(csv_result_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VV_Asc.csv",
+                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string)-3], fmt='%f')
         if "VV" in file and "Desc" in file:
-            np.savetxt(results_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VV_Desc.csv",
-                       patch_mean, delimiter=",", header="date,VV1,VV2,VV3,VV4,VV5,VV6,VV7,VV8,VV9,VV10,VV11,VV12,VV13,"
-                                                         "VV14,VV15,VV16,VV17,VV18,VV19,VV20", fmt='%f')
+            np.savetxt(csv_result_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VV_Desc.csv",
+                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string)-3], fmt='%f')
 
 
 def import_csv(path_to_folder):
