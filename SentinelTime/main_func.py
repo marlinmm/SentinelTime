@@ -19,18 +19,19 @@ def main():
 
     ########################### USER-DEPENDENT FUNCTIONS TO BE USED ##########################
     # Creating a raster stack clipped to the extents of the specified shapefile:
-    # raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir, overwrite=False)
+    raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir, overwrite=False)
 
     # Extract time series information based on point shapefiles and export information to csv file:
-    # point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
-    # for shapefile in point_list:
-    #     extract_time_series(results_dir=results_dir, point_path=shapefile, buffer_size=100)
+    point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
+    for shapefile in point_list:
+        extract_time_series(results_dir=results_dir, point_path=shapefile, buffer_size=100)
 
     # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
     # each class:
-    # temporal_statistics(path_to_folder=results_dir, plot_bool=True)
+    temporal_statistics(path_to_folder=results_dir, plot_bool=True)
 
-    ratio_calc(path_to_folder=results_dir, plot_bool=True)
+    # Calculate VH/VV Ratio for each class and flight direction:
+    # ratio_calc(path_to_folder=results_dir, plot_bool=True)
 
 if __name__ == '__main__':
     main()
