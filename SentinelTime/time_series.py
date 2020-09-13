@@ -129,7 +129,7 @@ def temporal_statistics(path_to_folder, plot_bool):
         flight directions
     """
     import matplotlib.pyplot as plt
-    df_name_list, df_list = import_csv(path_to_folder)
+    df_name_list, df_list = import_csv(path_to_folder + "CSV/")
     statistics_dict = {}
 
     # Iterate through all dataframes and compute temporal statistics
@@ -147,7 +147,7 @@ def temporal_statistics(path_to_folder, plot_bool):
         statistics_dict[df_name_list[i]]["Temporal Min."] = df["patches_mean"].min()
         statistics_dict[df_name_list[i]]["Temporal Amp."] = df["patches_mean"].max() - df["patches_mean"].min()
 
-    # Plot mean of all patches over timne if boolean is TRUE
+    # Plot mean of all patches over time if boolean is TRUE
     if plot_bool:
         tmp = 0
         # Iterate through a quarter of the csv files to account for all four possible options of VH/VV/Asc/Desc
@@ -158,8 +158,8 @@ def temporal_statistics(path_to_folder, plot_bool):
                     plt.title('Mean of all Patches for class: ' + str(df_name_list[tmp][0:6]))
                 if k == 1:
                     plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:6]))
-                plt.plot('date', elem, data=df_list[tmp+0], marker='', color='blue', linewidth=2,
-                         label=df_name_list[tmp+0])
+                plt.plot('date', elem, data=df_list[tmp], marker='', color='blue', linewidth=2,
+                         label=df_name_list[tmp])
                 plt.plot('date', elem, data=df_list[tmp+1], marker='', color='black', linewidth=2,
                          label=df_name_list[tmp+1])
                 plt.plot('date', elem, data=df_list[tmp+2], marker='', color='green', linewidth=2,
@@ -172,3 +172,58 @@ def temporal_statistics(path_to_folder, plot_bool):
             tmp = tmp + 4
     print(statistics_dict)
     return statistics_dict
+
+
+def ratio_calc(path_to_folder, plot_bool):
+    import pandas as pd
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.expand_frame_repr', False)
+    pd.set_option('max_colwidth', -1)
+
+    import matplotlib.pyplot as plt
+    df_name_list, df_list = import_csv(path_to_folder + "CSV/")
+    tmp = 0
+    Asc_ratio_list = []
+    Desc_ratio_list = []
+    for i in range(int(len(df_list)/4)):
+
+        VH_Asc_df = df_list[tmp]
+        VH_Asc_df["patches_mean"] = df_list[tmp].mean(axis=1)
+
+        VH_Desc_df = df_list[tmp+1]
+        VH_Desc_df["patches_mean"] = df_list[tmp+1].mean(axis=1)
+
+        VV_Asc_df = df_list[tmp+2]
+        VV_Asc_df["patches_mean"] = df_list[tmp+2].mean(axis=1)
+
+        VV_Desc_df = df_list[tmp+3]
+        VV_Desc_df["patches_mean"] = df_list[tmp+3].mean(axis=1)
+
+        tmp = tmp + 4
+        Asc_ratio = pd.DataFrame()
+        Asc_ratio["date"] = VH_Asc_df["date"]
+        Asc_ratio["VH_VV"] = VH_Asc_df["patches_mean"] - VV_Asc_df["patches_mean"]
+        print(Asc_ratio)
+
+        Desc_ratio = pd.DataFrame()
+        Desc_ratio["date"] = VH_Desc_df["date"]
+        Desc_ratio["VH_VV"] = VH_Desc_df["patches_mean"] - VV_Desc_df["patches_mean"]
+        print(Desc_ratio)
+
+        Asc_ratio_list.append(Asc_ratio)
+        Desc_ratio_list.append(Desc_ratio)
+
+        if plot_bool:
+            plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:6]))
+            plt.plot('date', "VH_VV", data=Asc_ratio, marker='', color='blue', linewidth=2,
+                     label="VH_VV_ratio for Asc")
+            plt.plot('date', "VH_VV", data=Desc_ratio, marker='', color='black', linewidth=2,
+                     label="VH_VV_ratio for Desc")
+            plt.legend()
+            plt.show()
+    return Asc_ratio_list, Desc_ratio_list
+
+
+def boxplots():
+    # Todo: create function
+    pass
