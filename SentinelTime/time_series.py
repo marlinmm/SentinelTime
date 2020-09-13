@@ -180,6 +180,15 @@ def temporal_statistics(path_to_folder, plot_bool):
 
 
 def ratio_calc(path_to_folder, plot_bool):
+    """
+    This function calculates the VH/VV ratio for all classes and flight directions and allows the user to plot the data
+    :param path_to_folder: string
+        Path to folder, where csv files are stored
+    :param plot_bool: boolean
+        If set to TRUE, the plots are calculated and shown
+    :return: list
+        Returns a list of dataframes containing VH/VV ratios for all classes and flight directions
+    """
     import pandas as pd
     pd.set_option('display.max_columns', None)
     pd.set_option('display.expand_frame_repr', False)
