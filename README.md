@@ -30,5 +30,5 @@ _Developed in Python 3.8_
 
 # TODO:
 * ~~point shapefile import as a list~~
-* RVI oder VH/VV ratio
+* RVI oder ~~VH/VV~~ ratio
 * boxplots
