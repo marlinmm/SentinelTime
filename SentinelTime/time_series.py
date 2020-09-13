@@ -172,7 +172,7 @@ def temporal_statistics(path_to_folder, plot_bool):
             # Increase tmp by 4 to get to the next class
             tmp = tmp + 4
     # Export temporal statistics to csv file:
-    with open(path_to_folder + 'CSV/Temp_Statistics.csv', 'w') as csv_file:
+    with open(path_to_folder + 'Temp_Statistics.csv', 'w') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in statistics_dict.items():
             writer.writerow([key, value])
