@@ -129,6 +129,7 @@ def temporal_statistics(path_to_folder, plot_bool):
         flight directions
     """
     import matplotlib.pyplot as plt
+    import csv
     df_name_list, df_list = import_csv(path_to_folder + "CSV/")
     statistics_dict = {}
 
@@ -170,7 +171,11 @@ def temporal_statistics(path_to_folder, plot_bool):
                 plt.show()
             # Increase tmp by 4 to get to the next class
             tmp = tmp + 4
-    print(statistics_dict)
+    # Export temporal statistics to csv file:
+    with open(path_to_folder + 'CSV/Temp_Statistics.csv', 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        for key, value in statistics_dict.items():
+            writer.writerow([key, value])
     return statistics_dict
 
 
