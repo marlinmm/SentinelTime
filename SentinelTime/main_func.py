@@ -8,10 +8,13 @@ def main():
     main_dir = "G:/Processed/original_data/"
 
     # Location of Shapefile to mask the ROI (must be polygon shapefile, simple polygon shapes are faster!):
-    shape_path = "G:/Shapes/Polygons/extend_of_points.shp"
+    shape_path = "G:/Shapes/Polygons/new_extent.shp"
 
     # Location of the point shapefile to extract data from timeseries with (must be point shapefile!):
     point_path = "G:/Shapes/Points/"
+
+    # Location of weatherdata in csv file format to calculate evapotranspiration:
+    weather_data = "G:/Weather_data/"
 
     ###################################     OUTPUT    ########################################
     # Create results folder outside of main_dir:
@@ -19,19 +22,21 @@ def main():
 
     ########################### USER-DEPENDENT FUNCTIONS TO BE USED ##########################
     # Creating a raster stack clipped to the extents of the specified shapefile:
-    raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir, overwrite=False)
+    # raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir, overwrite=False)
 
     # Extract time series information based on point shapefiles and export information to csv file:
     point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
+    print(point_list)
     for shapefile in point_list:
-        extract_time_series(results_dir=results_dir, point_path=shapefile, buffer_size=100)
+        extract_time_series(results_dir=results_dir, shapefile=shapefile, buffer_size=100, point_path=point_path)
 
     # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
     # each class:
-    temporal_statistics(path_to_folder=results_dir, plot_bool=True)
+    # temporal_statistics(path_to_folder=results_dir, plot_bool=True)
 
     # Calculate VH/VV Ratio for each class and flight direction:
     # ratio_calc(path_to_folder=results_dir, plot_bool=True)
+
 
 if __name__ == '__main__':
     main()
