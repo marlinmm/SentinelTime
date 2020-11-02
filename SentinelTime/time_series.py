@@ -18,10 +18,12 @@ def extract_dates(directory):
     return date_list
 
 
-def extract_time_series(results_dir, point_path, buffer_size):
+def extract_time_series(results_dir, shapefile, buffer_size, point_path):
     """
     Extracts time series information from patches of pixels using points and a buffer size to specify the size of the
     patch
+    :param shapefile: string
+        Path to point shapefile including name of shapefile
     :param results_dir: string
         Path to results directory, where layerstacks are stored and csv files will be stored
     :param point_path: string
@@ -30,7 +32,7 @@ def extract_time_series(results_dir, point_path, buffer_size):
         Buffer size specifies the length of the rectangular buffer around the point
     """
     # Import Patches for each class and all 4 layerstacks (VH/VV/Asc/Desc)
-    patches = create_point_buffer(point_path, buffer_size=buffer_size)
+    patches = create_point_buffer(shapefile, buffer_size=buffer_size)
     layer_stacks = extract_files_to_list(path_to_folder=results_dir, datatype=".tif", path_bool=True)
 
     # Iterate through all layerstacks:
@@ -82,20 +84,20 @@ def extract_time_series(results_dir, point_path, buffer_size):
 
         # Export patch means to csv files for each class, polarization and flight direction:
         if "VH" in file and "Asc" in file:
-            np.savetxt(csv_result_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VH_Asc.csv",
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)] + "_VH_Asc.csv",
                        patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string)-3], fmt='%f')
         if "VH" in file and "Desc" in file:
-            np.savetxt(csv_result_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VH_Desc.csv",
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)] + "_VH_Desc.csv",
                        patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string)-3], fmt='%f')
         if "VV" in file and "Asc" in file:
-            np.savetxt(csv_result_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VV_Asc.csv",
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)] + "_VV_Asc.csv",
                        patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string)-3], fmt='%f')
         if "VV" in file and "Desc" in file:
-            np.savetxt(csv_result_dir + point_path[point_path.index("clc"):point_path.index("clc")+6] + "_VV_Desc.csv",
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)] + "_VV_Desc.csv",
                        patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string)-3], fmt='%f')
 
 
-def import_csv(path_to_folder):
+def import_time_series_csv(path_to_folder):
     """
     Imports csv files from results folder
     :param path_to_folder: string
@@ -130,7 +132,7 @@ def temporal_statistics(path_to_folder, plot_bool):
     """
     import matplotlib.pyplot as plt
     import csv
-    df_name_list, df_list = import_csv(path_to_folder + "CSV/")
+    df_name_list, df_list = import_time_series_csv(path_to_folder + "CSV/")
     statistics_dict = {}
 
     # Iterate through all dataframes and compute temporal statistics
@@ -195,7 +197,7 @@ def ratio_calc(path_to_folder, plot_bool):
     pd.set_option('max_colwidth', -1)
 
     import matplotlib.pyplot as plt
-    df_name_list, df_list = import_csv(path_to_folder + "CSV/")
+    df_name_list, df_list = import_time_series_csv(path_to_folder + "CSV/")
     tmp = 0
     Asc_ratio_list = []
     Desc_ratio_list = []
