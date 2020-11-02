@@ -89,6 +89,7 @@ def raster_stack(shape_path, main_dir, results_dir, overwrite):
     """
     This function stacks the clipped raster files to one raster time series stack for each polarization and flight
     direction
+    :param overwrite:
     :param shape_path: string
         Path to shapfile for ROI
     :param main_dir: string
