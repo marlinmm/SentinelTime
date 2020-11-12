@@ -84,16 +84,16 @@ def extract_time_series(results_dir, shapefile, buffer_size, point_path):
 
         # Export patch means to csv files for each class, polarization and flight direction:
         if "VH" in file and "Asc" in file:
-            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)] + "_VH_Asc.csv",
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)-4] + "_VH_Asc.csv",
                        patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string)-3], fmt='%f')
         if "VH" in file and "Desc" in file:
-            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)] + "_VH_Desc.csv",
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)-4] + "_VH_Desc.csv",
                        patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string)-3], fmt='%f')
         if "VV" in file and "Asc" in file:
-            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)] + "_VV_Asc.csv",
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)-4] + "_VV_Asc.csv",
                        patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string)-3], fmt='%f')
         if "VV" in file and "Desc" in file:
-            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)] + "_VV_Desc.csv",
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)-4] + "_VV_Desc.csv",
                        patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string)-3], fmt='%f')
 
 
@@ -119,11 +119,13 @@ def import_time_series_csv(path_to_folder):
     return df_name_list, df_list
 
 
-def temporal_statistics(path_to_folder, plot_bool):
+def temporal_statistics(path_to_csv_folder, results_dir, plot_bool):
     """
     Function calculates temporal statistics for all classes, polarizations and flight directions
-    :param path_to_folder: string
-        Path to folder, where csv files are storec
+    :param path_to_csv_folder:
+        Path to folder, where csv files are stored
+    :param results_dir:
+
     :param plot_bool: boolean
         If set to True, charts of mean and std.dev. are plotted
     :return: dict
@@ -132,23 +134,26 @@ def temporal_statistics(path_to_folder, plot_bool):
     """
     import matplotlib.pyplot as plt
     import csv
-    df_name_list, df_list = import_time_series_csv(path_to_folder + "CSV/")
+    from scipy.ndimage.filters import gaussian_filter1d
+    df_name_list, df_list = import_time_series_csv(path_to_csv_folder)
     statistics_dict = {}
 
     # Iterate through all dataframes and compute temporal statistics
     for i, df in enumerate(df_list):
         # Temporal Mean:
         df["patches_mean"] = df.mean(axis=1)
-        statistics_dict[df_name_list[i]] = {"Temporal Mean": df["patches_mean"].mean()}
+        # print(df_name_list[i])
+        statistics_dict[df_name_list[i]] = {"Temporal Mean": round(df["patches_mean"].mean(), 3)}
 
         # Temporal Standard Deviation:
         df["patches_std"] = df.std(axis=1)
-        statistics_dict[df_name_list[i]]["Temporal Stdev."] = df["patches_std"].mean()
+        statistics_dict[df_name_list[i]]["Temporal Stdev."] = round(df["patches_std"].mean(), 3)
 
         # Max., Min. and Amplitude:
-        statistics_dict[df_name_list[i]]["Temporal Max."] = df["patches_mean"].max()
-        statistics_dict[df_name_list[i]]["Temporal Min."] = df["patches_mean"].min()
-        statistics_dict[df_name_list[i]]["Temporal Amp."] = df["patches_mean"].max() - df["patches_mean"].min()
+        statistics_dict[df_name_list[i]]["Temporal Max."] = round(df["patches_mean"].max(), 3)
+        statistics_dict[df_name_list[i]]["Temporal Min."] = round(df["patches_mean"].min(), 3)
+        statistics_dict[df_name_list[i]]["Temporal Amp."] = round(df["patches_mean"].max() - df["patches_mean"].min(),
+                                                                  3)
 
     # Plot mean of all patches over time if boolean is TRUE
     if plot_bool:
@@ -156,27 +161,50 @@ def temporal_statistics(path_to_folder, plot_bool):
         # Iterate through a quarter of the csv files to account for all four possible options of VH/VV/Asc/Desc
         for j in range(0, int(len(df_name_list)/4)):
             # Iterate through Mean and Std.Dev.:
-            for k, elem in enumerate(["patches_mean", "patches_std"]):
+            for k, elem in enumerate(["patches_mean"]):
+                # plt.figure(figsize=(16, 9))
                 if k == 0:
-                    plt.title('Mean of all Patches for class: ' + str(df_name_list[tmp][0:6]))
+                    plt.figure(figsize=(16, 9))
+                    plt.title('Mean of all Patches for class: ' + str(df_name_list[tmp][0:17]))
                 if k == 1:
-                    plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:6]))
-                plt.plot('date', elem, data=df_list[tmp], marker='', color='blue', linewidth=2,
-                         label=df_name_list[tmp])
-                plt.plot('date', elem, data=df_list[tmp+1], marker='', color='black', linewidth=2,
-                         label=df_name_list[tmp+1])
-                plt.plot('date', elem, data=df_list[tmp+2], marker='', color='green', linewidth=2,
-                         label=df_name_list[tmp+2])
-                plt.plot('date', elem, data=df_list[tmp+3], marker='', color='red', linewidth=2,
-                         label=df_name_list[tmp+3])
+                    plt.figure(figsize=(16, 9))
+                    plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:17]))
+                plt.plot('date', elem, data=df_list[tmp], marker='', color='blue', linewidth=1,
+                         label=df_name_list[tmp][25:len(df_name_list[tmp])])
+                plt.plot('date', elem, data=df_list[tmp+1], marker='', color='black', linewidth=1,
+                         label=df_name_list[tmp+1][25:len(df_name_list[tmp+1])])
+                #print(df_name_list[tmp+3])
+                #print(df_name_list[tmp+2][25:len(df_name_list[tmp+2])])
+                plt.plot('date', elem, data=df_list[tmp+2], marker='', color='green', linewidth=1,
+                         label=df_name_list[tmp+2][25:len(df_name_list[tmp+2])])
+                plt.plot('date', elem, data=df_list[tmp+3], marker='', color='red', linewidth=1,
+                         label=df_name_list[tmp+3][25:len(df_name_list[tmp+3])])
                 plt.legend()
-                plt.show()
+                #print(type(df_list[tmp]["patches_mean"]))
+                arr1 = gaussian_filter1d(df_list[tmp]["patches_mean"].to_numpy(), sigma=2)
+                arr2 = gaussian_filter1d(df_list[tmp+1]["patches_mean"].to_numpy(), sigma=2)
+                arr3 = gaussian_filter1d(df_list[tmp+2]["patches_mean"].to_numpy(), sigma=2)
+                arr4 = gaussian_filter1d(df_list[tmp+3]["patches_mean"].to_numpy(), sigma=2)
+                #print(arr1)
+                plt.plot(df_list[tmp]['date'], arr1, marker='', color='blue', linewidth=3,
+                         label=df_name_list[tmp][24:len(df_name_list[tmp])-3])
+                plt.plot(df_list[tmp+1]['date'], arr2, marker='', color='black', linewidth=3,
+                         label=df_name_list[tmp+1][24:len(df_name_list[tmp+1])-3])
+                plt.plot(df_list[tmp+2]['date'], arr3, marker='', color='green', linewidth=3,
+                         label=df_name_list[tmp+2][24:len(df_name_list[tmp+2])-3])
+                plt.plot(df_list[tmp+3]['date'], arr4, marker='', color='red', linewidth=3,
+                         label=df_name_list[tmp+3][24:len(df_name_list[tmp+3])-3])
+
+                # plt.legend()
+                plt.ylim((-18, -7))
+                #plt.show()
             # Increase tmp by 4 to get to the next class
             tmp = tmp + 4
     # Export temporal statistics to csv file:
-    with open(path_to_folder + 'Temp_Statistics.csv', 'w') as csv_file:
+    with open(results_dir + 'Temp_Statistics.csv', 'w') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in statistics_dict.items():
+            print(value)
             writer.writerow([key, value])
     return statistics_dict
 
