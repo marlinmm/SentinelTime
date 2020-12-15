@@ -11,7 +11,7 @@ def main():
     # Location of Shapefile to mask the ROI (must be polygon shapefile, simple polygon shapes are faster!):
     shape_path = "G:/Shapes/Polygons/new_extent.shp"
 
-    # Location of the point shapefile to extract data from timeseries with (must be point shapefile!):
+    # Location of the point shapefile to extract data from time series with (must be point shapefile!):
     point_path = "G:/Shapes/Points"
 
     csv_folder = "G:/Processed/results/CSV/"
@@ -41,8 +41,10 @@ def main():
     # Calculate VH/VV Ratio for each class and flight direction:
     # ratio_calc(path_to_folder=results_dir, plot_bool=True)
 
-    clean_weather_df(path_to_weather_folder=weather_data, path_to_csv_folder=csv_folder,
-                     station_heights=station_heights)
+    # clean_weather_df(path_to_weather_folder=weather_data, path_to_csv_folder=csv_folder,
+    #                  station_heights=station_heights)
+
+    eliminate_nanoverlap(main_dir=main_dir, shape_path=shape_path)
 
 
 if __name__ == '__main__':
