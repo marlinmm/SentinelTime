@@ -6,18 +6,19 @@ def import_weather_csv(path_to_weather_folder):
     """
     import pandas as pd
     csv_list = data_preprocessing.extract_files_to_list(path_to_weather_folder, datatype=".csv", path_bool=False)
+    #df_name_list = data_preprocessing.extract_files_to_list(path_to_weather_folder, datatype=".csv", path_bool=True)
     df_list = []
     for csv in csv_list:
         df = pd.read_csv(path_to_weather_folder + csv, sep=";", decimal=',')
         df_list.append(df)
-    return df_list
+    return df_list, csv_list
 
 
 def calc_evapotranspiration(path_to_weather_folder, station_heights):
     import numpy as np
     import matplotlib.pyplot as plt
-    csv_list = import_weather_csv(path_to_weather_folder)
-    print(csv_list)
+    csv_list, df_name_list = import_weather_csv(path_to_weather_folder)
+    # print(csv_list)
     df_list = []
     for i, df in enumerate(csv_list):
         r = df['SUM_GS200'].multiply(0.0036)
@@ -45,7 +46,7 @@ def calc_evapotranspiration(path_to_weather_folder, station_heights):
 
         df['ETc'] = ETc
         df_list.append(df)
-    return df_list
+    return df_list, df_name_list
 
 
 def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights):
@@ -57,14 +58,14 @@ def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights
     import scipy.signal as sig
     from scipy.ndimage.filters import gaussian_filter1d
 
-    weather_df = calc_evapotranspiration(path_to_weather_folder, station_heights)
+    weather_df, df_name_list = calc_evapotranspiration(path_to_weather_folder, station_heights)
 
     sentinel_dfs = time_series.import_time_series_csv(path_to_csv_folder)
 
     r_squared_list = []
 
     for i, weather_data in enumerate(weather_df):
-
+        # print(df_name_list[i])
         weather_data = weather_data.rename({"Tag": "date"}, axis=1)
         weather_data['date'] = pd.to_datetime(weather_data['date'], format='%d.%m.%Y')
 
@@ -80,11 +81,13 @@ def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights
             tmp_sen_df = pd.DataFrame(columns=['date', 'patches_mean'])
             tmp_sen_df['date'] = sen_df["date"]
             tmp_sen_df['patches_mean'] = sen_df['patches_mean']
+            tmp_sen_df['lin_patches_mean'] = 10 ** (sen_df['patches_mean'] / 10)
 
             combine = pd.merge(tmp_sen_df, ETc_df, on='date')
+            all_temp_combine = combine
             combine = combine.query("t_min >= 0")
             combine = combine.reset_index(drop=True)
-
+            print(combine)
             kernel = 5
             kernel_half = kernel//2
 
@@ -108,7 +111,14 @@ def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights
             # use the function regplot to make a scatterplot
             sns.regplot(x=patches_filt, y=etc_filt, fit_reg=False)
 
+            print(sentinel_dfs[0][j])
+
             fig, ax1 = plt.subplots()
+            part1 = df_name_list[i][0:len(df_name_list[i])-4]
+            print(part1)
+            part2 = sentinel_dfs[0][j][len(sentinel_dfs[0][j])-7:len(sentinel_dfs[0][j])]
+            print(part2)
+            ax1.set_title(part1 + " " + part2, fontsize=28)
             fig.set_figheight(9)
             fig.set_figwidth(21)
             color = 'tab:red'
