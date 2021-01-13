@@ -39,6 +39,7 @@ def import_polygons(shape_path):
     """
     active_shapefile = fiona.open(shape_path, "r")
     for i in range(0, len(list(active_shapefile))):
+        features = [feature for feature in active_shapefile]
         shapes = [feature["geometry"] for feature in active_shapefile]
     return shapes
 
