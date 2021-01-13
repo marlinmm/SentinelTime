@@ -1,6 +1,7 @@
 from SentinelTime.mask_stack import *
 from SentinelTime.time_series import *
 from SentinelTime.weather_data import *
+from SentinelTime.fern_analysis.analysis_and_plots import *
 
 
 def main():
@@ -10,11 +11,15 @@ def main():
 
     # Location of Shapefile to mask the ROI (must be polygon shapefile, simple polygon shapes are faster!):
     shape_path = "G:/Shapes/Polygons/new_extent.shp"
+    # shape_path = "G:/FuerMarlin_BoFEuFarnkraut/extent/fern_extent.shp"
 
     # Location of the point shapefile to extract data from time series with (must be point shapefile!):
-    point_path = "G:/Shapes/Points"
+    # point_path = "G:/Shapes/Points"
+    # point_path = "G:/FuerMarlin_BoFEuFarnkraut"
+    point_path = "G:/Shapes/Points/clc312_close_to_stations"
 
     csv_folder = "G:/Processed/results/CSV/"
+    # csv_folder = "G:/Processed/results/AAA_Weather_Stations_2016-2019/CSV/"
 
     # Location of weatherdata in csv file format to calculate evapotranspiration:
     weather_data = "G:/Weather_data/"
@@ -32,11 +37,18 @@ def main():
     # point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
     # print(point_list)
     # for shapefile in point_list:
-    #     extract_time_series(results_dir=results_dir, shapefile=shapefile, buffer_size=50, point_path=point_path)
+    #     extract_time_series(results_dir=results_dir, shapefile=shapefile, buffer_size=100, point_path=point_path)
 
     # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
     # each class:
-    # temporal_statistics(path_to_csv_folder=csv_folder, results_dir=results_dir, plot_bool=True)
+    # temporal_statistics(path_to_csv_folder=csv_folder, results_dir=results_dir, plot_bool=True, frost_bool=False)
+
+    # dataframe_difference_calc(path_to_csv_folder=csv_folder, results_dir=results_dir, plot_bool=True, frost_bool=False)
+
+    boxplots(path_to_csv_folder=csv_folder, results_dir=results_dir, plot_bool=False,
+             season=["spring", "summer", "autumn", "winter"], frost_bool=False, input_data="mean")
+
+    # import_weather_for_fern(radar_df="")
 
     # Calculate VH/VV Ratio for each class and flight direction:
     # ratio_calc(path_to_folder=results_dir, plot_bool=True)
@@ -44,7 +56,7 @@ def main():
     # clean_weather_df(path_to_weather_folder=weather_data, path_to_csv_folder=csv_folder,
     #                  station_heights=station_heights)
 
-    eliminate_nanoverlap(main_dir=main_dir, shape_path=shape_path)
+    # eliminate_nanoverlap(main_dir=main_dir, shape_path=shape_path)
 
 
 if __name__ == '__main__':
