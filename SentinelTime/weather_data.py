@@ -85,7 +85,7 @@ def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights
 
             combine = pd.merge(tmp_sen_df, ETc_df, on='date')
             all_temp_combine = combine
-            combine = combine.query("t_min >= 0")
+            combine = combine.query("t_min >= -1")
             combine = combine.reset_index(drop=True)
             print(combine)
             kernel = 5
