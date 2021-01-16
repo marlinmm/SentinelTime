@@ -4,4 +4,4 @@ GDAL
 matplotlib
 numpy
 pandas
-setuptools
+seaborn
