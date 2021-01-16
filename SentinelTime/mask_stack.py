@@ -129,6 +129,6 @@ def raster_stack(shape_path, main_dir, results_dir, overwrite):
 
         # Write rasterstacks for all polarizations and flight directions:
         with rasterio.open(results_dir + stack_name, 'w', **meta) as dst:
-            for id, layer in enumerate(file_list, start=1):
+            for i, layer in enumerate(file_list, start=1):
                 with rasterio.open(layer) as src1:
-                    dst.write_band(id, src1.read(1))
+                    dst.write_band(i, src1.read(1))

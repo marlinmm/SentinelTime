@@ -86,17 +86,17 @@ def extract_time_series(results_dir, shapefile, buffer_size, point_path):
 
         # Export patch means to csv files for each class, polarization and flight direction:
         if "VH" in file and "Asc" in file:
-            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)-4] + "_VH_Asc.csv",
-                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string)-3], fmt='%f')
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile) - 4] + "_VH_Asc.csv",
+                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string) - 3], fmt='%f')
         if "VH" in file and "Desc" in file:
-            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)-4] + "_VH_Desc.csv",
-                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string)-3], fmt='%f')
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile) - 4] + "_VH_Desc.csv",
+                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string) - 3], fmt='%f')
         if "VV" in file and "Asc" in file:
-            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)-4] + "_VV_Asc.csv",
-                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string)-3], fmt='%f')
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile) - 4] + "_VV_Asc.csv",
+                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string) - 3], fmt='%f')
         if "VV" in file and "Desc" in file:
-            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile)-4] + "_VV_Desc.csv",
-                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string)-3], fmt='%f')
+            np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile) - 4] + "_VV_Desc.csv",
+                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string) - 3], fmt='%f')
 
 
 def import_time_series_csv(path_to_folder, frost_bool):
@@ -119,7 +119,7 @@ def import_time_series_csv(path_to_folder, frost_bool):
         if frost_bool:
             df = import_weather_for_fern(radar_df=df)
 
-        df_name_list.append(csv[0:len(csv)-4])
+        df_name_list.append(csv[0:len(csv) - 4])
         df_list.append(df)
     return df_name_list, df_list
 
@@ -167,7 +167,7 @@ def temporal_statistics(path_to_csv_folder, results_dir, plot_bool, frost_bool):
     dataframe_list4 = []
     tmp = 0
     # Iterate through a quarter of the csv files to account for all four possible options of VH/VV/Asc/Desc
-    for j in range(0, int(len(df_name_list)/4)):
+    for j in range(0, int(len(df_name_list) / 4)):
         # Iterate through Mean and Std.Dev.:
         for k, elem in enumerate(["patches_mean"]):
             # Plot mean of all patches over time if boolean is TRUE
@@ -181,17 +181,17 @@ def temporal_statistics(path_to_csv_folder, results_dir, plot_bool, frost_bool):
                     plt.figure(figsize=(16, 9))
                     plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:17]))
                 plt.plot('date', elem, data=df_list[tmp], marker='', color='blue', linewidth=1, label="")
-                plt.plot('date', elem, data=df_list[tmp+1], marker='', color='black', linewidth=1, label="")
-                print(df_name_list[tmp+3])
-                print(df_name_list[tmp+2])
-                plt.plot('date', elem, data=df_list[tmp+2], marker='', color='green', linewidth=1, label="")
-                plt.plot('date', elem, data=df_list[tmp+3], marker='', color='red', linewidth=1, label="")
+                plt.plot('date', elem, data=df_list[tmp + 1], marker='', color='black', linewidth=1, label="")
+                print(df_name_list[tmp + 3])
+                print(df_name_list[tmp + 2])
+                plt.plot('date', elem, data=df_list[tmp + 2], marker='', color='green', linewidth=1, label="")
+                plt.plot('date', elem, data=df_list[tmp + 3], marker='', color='red', linewidth=1, label="")
 
             # filter time series using gaussian filter:
             arr1 = gaussian_filter1d(df_list[tmp]["patches_mean"].to_numpy(), sigma=2)
-            arr2 = gaussian_filter1d(df_list[tmp+1]["patches_mean"].to_numpy(), sigma=2)
-            arr3 = gaussian_filter1d(df_list[tmp+2]["patches_mean"].to_numpy(), sigma=2)
-            arr4 = gaussian_filter1d(df_list[tmp+3]["patches_mean"].to_numpy(), sigma=2)
+            arr2 = gaussian_filter1d(df_list[tmp + 1]["patches_mean"].to_numpy(), sigma=2)
+            arr3 = gaussian_filter1d(df_list[tmp + 2]["patches_mean"].to_numpy(), sigma=2)
+            arr4 = gaussian_filter1d(df_list[tmp + 3]["patches_mean"].to_numpy(), sigma=2)
 
             # append filterd datasets to lists for further use:
             dataframe_list1.append(arr1)
@@ -205,14 +205,14 @@ def temporal_statistics(path_to_csv_folder, results_dir, plot_bool, frost_bool):
                 plt.plot(df_list[tmp]['date'], arr1, marker='', color='blue', linewidth=3,
                          label=df_name_list[tmp][18:len(df_name_list[tmp])])
 
-                plt.plot(df_list[tmp+1]['date'], arr2, marker='', color='black', linewidth=3,
-                         label=df_name_list[tmp+1][18:len(df_name_list[tmp+1])])
+                plt.plot(df_list[tmp + 1]['date'], arr2, marker='', color='black', linewidth=3,
+                         label=df_name_list[tmp + 1][18:len(df_name_list[tmp + 1])])
 
-                plt.plot(df_list[tmp+2]['date'], arr3, marker='', color='green', linewidth=3,
-                         label=df_name_list[tmp+2][18:len(df_name_list[tmp+2])])
+                plt.plot(df_list[tmp + 2]['date'], arr3, marker='', color='green', linewidth=3,
+                         label=df_name_list[tmp + 2][18:len(df_name_list[tmp + 2])])
 
-                plt.plot(df_list[tmp+3]['date'], arr4, marker='', color='red', linewidth=3,
-                         label=df_name_list[tmp+3][18:len(df_name_list[tmp+3])])
+                plt.plot(df_list[tmp + 3]['date'], arr4, marker='', color='red', linewidth=3,
+                         label=df_name_list[tmp + 3][18:len(df_name_list[tmp + 3])])
                 plt.xlabel("Date")
                 plt.ylabel("Backscatter (dB)")
                 plt.legend()
@@ -233,6 +233,7 @@ def temporal_statistics(path_to_csv_folder, results_dir, plot_bool, frost_bool):
 def ratio_calc(path_to_folder, plot_bool, frost_bool):
     """
     This function calculates the VH/VV ratio for all classes and flight directions and allows the user to plot the data
+    :param frost_bool: XXXXXXXXXXXXXXXXXXXXXXXX
     :param path_to_folder: string
         Path to folder, where csv files are stored
     :param plot_bool: boolean
@@ -248,19 +249,19 @@ def ratio_calc(path_to_folder, plot_bool, frost_bool):
     tmp = 0
     Asc_ratio_list = []
     Desc_ratio_list = []
-    for i in range(int(len(df_list)/4)):
+    for i in range(int(len(df_list) / 4)):
 
         VH_Asc_df = df_list[tmp]
         VH_Asc_df["patches_mean"] = df_list[tmp].mean(axis=1)
 
-        VH_Desc_df = df_list[tmp+1]
-        VH_Desc_df["patches_mean"] = df_list[tmp+1].mean(axis=1)
+        VH_Desc_df = df_list[tmp + 1]
+        VH_Desc_df["patches_mean"] = df_list[tmp + 1].mean(axis=1)
 
-        VV_Asc_df = df_list[tmp+2]
-        VV_Asc_df["patches_mean"] = df_list[tmp+2].mean(axis=1)
+        VV_Asc_df = df_list[tmp + 2]
+        VV_Asc_df["patches_mean"] = df_list[tmp + 2].mean(axis=1)
 
-        VV_Desc_df = df_list[tmp+3]
-        VV_Desc_df["patches_mean"] = df_list[tmp+3].mean(axis=1)
+        VV_Desc_df = df_list[tmp + 3]
+        VV_Desc_df["patches_mean"] = df_list[tmp + 3].mean(axis=1)
 
         tmp = tmp + 4
         Asc_ratio = pd.DataFrame()

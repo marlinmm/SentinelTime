@@ -60,10 +60,13 @@ def create_shape_buffer(shape_path, buffer_size):
     for i in range(0, len(import_list[0]["coordinates"][0]) - 1):
         lon = import_list[0]["coordinates"][0][i][0]
         lat = import_list[0]["coordinates"][0][i][1]
-        upper_left = (lon - buffer_size, lat + buffer_size)
-        upper_right = (lon + buffer_size, lat + buffer_size)
-        lower_left = (lon - buffer_size, lat - buffer_size)
-        lower_right = (lon + buffer_size, lat - buffer_size)
+
+        # upper_left = (lon - buffer_size, lat + buffer_size)
+        # upper_right = (lon + buffer_size, lat + buffer_size)
+        # lower_left = (lon - buffer_size, lat - buffer_size)
+        # lower_right = (lon + buffer_size, lat - buffer_size)
+
+        upper_left, upper_right, lower_left, lower_right = create_buffer(lat, lon, buffer_size)
         buffer_coord = [[upper_left, upper_right, lower_right, lower_left, upper_left]]
         buffer = {"type": "Polygon", "coordinates": buffer_coord}
         buffer_list.append(buffer)
@@ -86,14 +89,25 @@ def create_point_buffer(point_path, buffer_size):
     for i in range(0, len(import_list)):
         lon = import_list[i]["coordinates"][0]
         lat = import_list[i]["coordinates"][1]
-        upper_left = (lon - buffer_size, lat + buffer_size)
-        upper_right = (lon + buffer_size, lat + buffer_size)
-        lower_left = (lon - buffer_size, lat - buffer_size)
-        lower_right = (lon + buffer_size, lat - buffer_size)
+
+        # upper_left = (lon - buffer_size, lat + buffer_size)
+        # upper_right = (lon + buffer_size, lat + buffer_size)
+        # lower_left = (lon - buffer_size, lat - buffer_size)
+        # lower_right = (lon + buffer_size, lat - buffer_size)
+
+        upper_left, upper_right, lower_left, lower_right = create_buffer(lat, lon, buffer_size)
         buffer_coord = [[upper_left, upper_right, lower_right, lower_left, upper_left]]
         buffer = {"type": "Polygon", "coordinates": buffer_coord}
         buffer_list.append(buffer)
     return buffer_list
+
+
+def create_buffer(lat, lon, buffer_size):
+    upper_left = (lon - buffer_size, lat + buffer_size)
+    upper_right = (lon + buffer_size, lat + buffer_size)
+    lower_left = (lon - buffer_size, lat - buffer_size)
+    lower_right = (lon + buffer_size, lat - buffer_size)
+    return upper_left, upper_right, lower_left, lower_right
 
 
 def eliminate_nanoverlap(main_dir, shape_path):
