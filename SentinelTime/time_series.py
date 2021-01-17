@@ -102,6 +102,7 @@ def extract_time_series(results_dir, shapefile, buffer_size, point_path):
 def import_time_series_csv(path_to_folder, frost_bool):
     """
     Imports csv files from results folder
+    :param frost_bool:
     :param path_to_folder: string
         Path to folder, where csv files are stored
     :return: tuple
@@ -116,17 +117,23 @@ def import_time_series_csv(path_to_folder, frost_bool):
         # Change datatype of date from float to date object:
         df['date'] = pd.to_datetime(df['date'], format='%Y%m%d')
 
+        # if frost_bool:
+        #     df, precip = import_weather_for_fern(radar_df=df)
+
         if frost_bool:
-            df = import_weather_for_fern(radar_df=df)
+            df, precip = import_weather_for_fern(radar_df=df, frost_bool=frost_bool)
+        if not frost_bool:
+            precip = import_weather_for_fern(radar_df=df, frost_bool=frost_bool)
 
         df_name_list.append(csv[0:len(csv) - 4])
         df_list.append(df)
-    return df_name_list, df_list
+    return df_name_list, df_list, precip
 
 
-def temporal_statistics(path_to_csv_folder, results_dir, plot_bool, frost_bool):
+def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, frost_bool):
     """
     Function calculates temporal statistics for all classes, polarizations and flight directions
+    :param fig_folder:
     :param frost_bool:
     :param path_to_csv_folder:
         Path to folder, where csv files are stored
@@ -140,12 +147,13 @@ def temporal_statistics(path_to_csv_folder, results_dir, plot_bool, frost_bool):
     """
     import csv
     from scipy.ndimage.filters import gaussian_filter1d
-    df_name_list, df_list = import_time_series_csv(path_to_csv_folder, frost_bool)
+    df_name_list, df_list, precip = import_time_series_csv(path_to_csv_folder, frost_bool)
     statistics_dict = {}
     # print(df_name_list)
 
     # Iterate through all dataframes and compute temporal statistics
     for i, df in enumerate(df_list):
+        # print(df)
         # Temporal Mean:
         df["patches_mean"] = df.mean(axis=1)
         # print(df_name_list[i])
@@ -174,18 +182,27 @@ def temporal_statistics(path_to_csv_folder, results_dir, plot_bool, frost_bool):
             if plot_bool:
                 plt.figure(figsize=(16, 9))
                 plt.rcParams.update({'font.size': 14})
+
+                # TODO: make weather data stuff optional!!!!
+
+                fig, ax1 = plt.subplots()
+                fig.set_figheight(9)
+                fig.set_figwidth(15)
+                ax2 = ax1.twinx()
+                # plt.figure(figsize=(16, 9))
+                # plt.rcParams.update({'font.size': 14})
                 if k == 0:
-                    plt.figure(figsize=(16, 9))
+                    # ax1.figure(figsize=(16, 9))
                     plt.title('Mean of all Patches for class: ' + str(df_name_list[tmp][0:17]))
                 if k == 1:
-                    plt.figure(figsize=(16, 9))
+                    # ax1.figure(figsize=(16, 9))
                     plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:17]))
-                plt.plot('date', elem, data=df_list[tmp], marker='', color='blue', linewidth=1, label="")
-                plt.plot('date', elem, data=df_list[tmp + 1], marker='', color='black', linewidth=1, label="")
-                print(df_name_list[tmp + 3])
-                print(df_name_list[tmp + 2])
-                plt.plot('date', elem, data=df_list[tmp + 2], marker='', color='green', linewidth=1, label="")
-                plt.plot('date', elem, data=df_list[tmp + 3], marker='', color='red', linewidth=1, label="")
+                ax1.plot('date', elem, data=df_list[tmp], marker='', color='blue', linewidth=1, label="")
+                ax1.plot('date', elem, data=df_list[tmp + 1], marker='', color='black', linewidth=1, label="")
+                # print(df_name_list[tmp + 3])
+                # print(df_name_list[tmp + 2])
+                ax1.plot('date', elem, data=df_list[tmp + 2], marker='', color='green', linewidth=1, label="")
+                ax1.plot('date', elem, data=df_list[tmp + 3], marker='', color='red', linewidth=1, label="")
 
             # filter time series using gaussian filter:
             arr1 = gaussian_filter1d(df_list[tmp]["patches_mean"].to_numpy(), sigma=2)
@@ -202,21 +219,36 @@ def temporal_statistics(path_to_csv_folder, results_dir, plot_bool, frost_bool):
             # Plot filtered mean of all patches over time if boolean is TRUE
             if plot_bool:
                 #
-                plt.plot(df_list[tmp]['date'], arr1, marker='', color='blue', linewidth=3,
+                ax1.plot(df_list[tmp]['date'], arr1, marker='', color='blue', linewidth=3,
                          label=df_name_list[tmp][18:len(df_name_list[tmp])])
 
-                plt.plot(df_list[tmp + 1]['date'], arr2, marker='', color='black', linewidth=3,
+                ax1.plot(df_list[tmp + 1]['date'], arr2, marker='', color='black', linewidth=3,
                          label=df_name_list[tmp + 1][18:len(df_name_list[tmp + 1])])
 
-                plt.plot(df_list[tmp + 2]['date'], arr3, marker='', color='green', linewidth=3,
+                ax1.plot(df_list[tmp + 2]['date'], arr3, marker='', color='green', linewidth=3,
                          label=df_name_list[tmp + 2][18:len(df_name_list[tmp + 2])])
 
-                plt.plot(df_list[tmp + 3]['date'], arr4, marker='', color='red', linewidth=3,
+                ax1.plot(df_list[tmp + 3]['date'], arr4, marker='', color='red', linewidth=3,
                          label=df_name_list[tmp + 3][18:len(df_name_list[tmp + 3])])
-                plt.xlabel("Date")
-                plt.ylabel("Backscatter (dB)")
+
+                # TODO: make weather data stuff optional!!!!
+
+                print(df_name_list[tmp + 3][18:len(df_name_list[tmp + 3])])
+                # plt.xlabel("Date")
+                ax1.set_xlabel('Date')
+                ax1.set_ylabel('Backscatter (dB)')
+                # plt.ylabel("Backscatter (dB)")
                 plt.legend()
                 plt.ylim((-18, -7))
+
+                print(precip)
+
+                ax2.plot(precip['date'], precip['precip'], color="grey")
+                # plt.ylabel("Precipitation (mm)")
+                ax2.set_ylabel('Precipitation (mm)')
+                plt.ylim((0, 20))
+
+                plt.savefig(fig_folder + "Mean_for_Class_test" + str(df_name_list[tmp][0:17]) + ".png", dpi=300)
                 plt.show()
 
         # Increase tmp by 4 to get to the next class
@@ -225,7 +257,7 @@ def temporal_statistics(path_to_csv_folder, results_dir, plot_bool, frost_bool):
     with open(results_dir + 'Temp_Statistics.csv', 'w') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in statistics_dict.items():
-            print(value)
+            # print(value)
             writer.writerow([key, value])
     return dataframe_list1, dataframe_list2, dataframe_list3, dataframe_list4, df_list
 
@@ -245,7 +277,7 @@ def ratio_calc(path_to_folder, plot_bool, frost_bool):
     pd.set_option('display.expand_frame_repr', False)
     pd.set_option('max_colwidth', -1)
 
-    df_name_list, df_list = import_time_series_csv(path_to_folder + "CSV/", frost_bool)
+    df_name_list, df_list, precip = import_time_series_csv(path_to_folder + "CSV/", frost_bool)
     tmp = 0
     Asc_ratio_list = []
     Desc_ratio_list = []
@@ -267,12 +299,12 @@ def ratio_calc(path_to_folder, plot_bool, frost_bool):
         Asc_ratio = pd.DataFrame()
         Asc_ratio["date"] = VH_Asc_df["date"]
         Asc_ratio["VH_VV"] = VH_Asc_df["patches_mean"] - VV_Asc_df["patches_mean"]
-        print(Asc_ratio)
+        # print(Asc_ratio)
 
         Desc_ratio = pd.DataFrame()
         Desc_ratio["date"] = VH_Desc_df["date"]
         Desc_ratio["VH_VV"] = VH_Desc_df["patches_mean"] - VV_Desc_df["patches_mean"]
-        print(Desc_ratio)
+        # print(Desc_ratio)
 
         Asc_ratio_list.append(Asc_ratio)
         Desc_ratio_list.append(Desc_ratio)
@@ -288,20 +320,24 @@ def ratio_calc(path_to_folder, plot_bool, frost_bool):
     return Asc_ratio_list, Desc_ratio_list
 
 
-def import_weather_for_fern(radar_df):
+def import_weather_for_fern(radar_df, frost_bool):
     fern_weather_station_data = "G:/Weather_data/Tageswerte_Lotschen_002.csv"
     lotschen_weather_df = pd.read_csv(fern_weather_station_data, sep=";", decimal=',')
 
     lotschen_weather_df = lotschen_weather_df.rename({"Tag": "date"}, axis=1)
     lotschen_weather_df['date'] = pd.to_datetime(lotschen_weather_df['date'], format='%d.%m.%Y')
 
-    min_temp_df = pd.DataFrame(columns=['date', 't_min'])
-    min_temp_df['date'] = lotschen_weather_df['date']
-    min_temp_df['t_min'] = lotschen_weather_df['MIN_TA200']
+    weather_df = pd.DataFrame(columns=['date', 't_min', 'precip'])
+    weather_df['date'] = lotschen_weather_df['date']
+    weather_df['t_min'] = lotschen_weather_df['MIN_TA200']
+    weather_df['precip'] = lotschen_weather_df['SUM_NN050']
 
-    combine = pd.merge(radar_df, min_temp_df, on='date')
-    combine = combine.query("t_min >= -1")
-    combine = combine.reset_index(drop=True)
-    combine = combine.drop("t_min", axis=1)
-
-    return combine
+    combine = pd.merge(radar_df, weather_df, on='date')
+    precip = combine
+    if frost_bool:
+        combine = combine.query("t_min >= -1")
+        combine = combine.reset_index(drop=True)
+        combine = combine.drop("t_min", axis=1)
+        return combine, precip
+    if not frost_bool:
+        return precip
