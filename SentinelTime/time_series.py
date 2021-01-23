@@ -159,6 +159,8 @@ def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, 
         # print(df_name_list[i])
         statistics_dict[df_name_list[i]] = {"Temporal Mean": round(df["patches_mean"].mean(), 3)}
 
+        statistics_dict[df_name_list[i]]["Temporal Median"] = round(df["patches_mean"].median(), 3)
+
         # Temporal Standard Deviation:
         df["patches_std"] = df.std(axis=1)
         statistics_dict[df_name_list[i]]["Temporal Stdev."] = round(df["patches_std"].mean(), 3)
@@ -168,7 +170,7 @@ def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, 
         statistics_dict[df_name_list[i]]["Temporal Min."] = round(df["patches_mean"].min(), 3)
         statistics_dict[df_name_list[i]]["Temporal Amp."] = round(df["patches_mean"].max()
                                                                   - df["patches_mean"].min(), 3)
-
+    print(statistics_dict)
     dataframe_list1 = []
     dataframe_list2 = []
     dataframe_list3 = []
@@ -225,7 +227,7 @@ def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, 
             arr3 = gaussian_filter1d(df_list[tmp + 2]["patches_mean"].to_numpy(), sigma=2)
             arr4 = gaussian_filter1d(df_list[tmp + 3]["patches_mean"].to_numpy(), sigma=2)
 
-            # append filterd datasets to lists for further use:
+            # append filtered datasets to lists for further use:
             dataframe_list1.append(arr1)
             dataframe_list2.append(arr2)
             dataframe_list3.append(arr3)
@@ -305,7 +307,7 @@ def ratio_calc(path_to_folder, plot_bool, frost_bool):
     Asc_ratio_list = []
     Desc_ratio_list = []
     for i in range(int(len(df_list) / 4)):
-
+        print(i)
         VH_Asc_df = df_list[tmp]
         VH_Asc_df["patches_mean"] = df_list[tmp].mean(axis=1)
 
@@ -318,7 +320,7 @@ def ratio_calc(path_to_folder, plot_bool, frost_bool):
         VV_Desc_df = df_list[tmp + 3]
         VV_Desc_df["patches_mean"] = df_list[tmp + 3].mean(axis=1)
 
-        tmp = tmp + 4
+
         Asc_ratio = pd.DataFrame()
         Asc_ratio["date"] = VH_Asc_df["date"]
         Asc_ratio["VH_VV"] = VH_Asc_df["patches_mean"] - VV_Asc_df["patches_mean"]
@@ -333,13 +335,16 @@ def ratio_calc(path_to_folder, plot_bool, frost_bool):
         Desc_ratio_list.append(Desc_ratio)
 
         if plot_bool:
-            plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:6]))
+            print(df_name_list[tmp])
+            # plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:6]))
+            plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp]))
             plt.plot('date', "VH_VV", data=Asc_ratio, marker='', color='blue', linewidth=2,
                      label="VH_VV_ratio for Asc")
             plt.plot('date', "VH_VV", data=Desc_ratio, marker='', color='black', linewidth=2,
                      label="VH_VV_ratio for Desc")
             plt.legend()
             plt.show()
+        tmp = tmp + 4
     return Asc_ratio_list, Desc_ratio_list
 
 
