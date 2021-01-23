@@ -14,4 +14,8 @@ def calculate_relative_orbit_S1(absolute_orbit_number, S1_satellite):
         relative_orbit_number = ((absolute_orbit_number - 27) % 175) + 1
     # Source: https://forum.step.esa.int/t/sentinel-1-relative-orbit-from-filename/7042 (Peter Meadows, Member of the
     # Mission Performance Centre)
+    print(relative_orbit_number)
     return relative_orbit_number
+
+
+# calculate_relative_orbit_S1(absolute_orbit_number=36115, S1_satellite="A")
