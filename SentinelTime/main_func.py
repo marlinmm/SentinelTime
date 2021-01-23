@@ -58,7 +58,7 @@ def main():
     # import_weather_for_fern(radar_df="")
 
     # Calculate VH/VV Ratio for each class and flight direction:
-    # ratio_calc(path_to_folder=results_dir, plot_bool=True)
+    # ratio_calc(path_to_folder=results_dir, plot_bool=True, frost_bool=False)
 
     # clean_weather_df(path_to_weather_folder=weather_data, path_to_csv_folder=csv_folder,
     #                  station_heights=station_heights)
