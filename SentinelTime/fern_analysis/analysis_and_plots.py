@@ -23,9 +23,13 @@ def dataframe_difference_calc(path_to_csv_folder, results_dir, fig_folder, plot_
     for i, elem in enumerate(all_data_list):
         title = title_list[i]
 
-        zero_max_diff = np.subtract(elem[0], elem[3])
-        zero_medium_diff = np.subtract(elem[0], elem[2])
-        zero_min_diff = np.subtract(elem[0], elem[1])
+        # zero_max_diff = np.subtract(elem[0], elem[3])
+        # zero_medium_diff = np.subtract(elem[0], elem[2])
+        # zero_min_diff = np.subtract(elem[0], elem[1])
+
+        zero_max_diff = np.abs(elem[0] - elem[3])
+        zero_medium_diff = np.abs(elem[0] - elem[2])
+        zero_min_diff = np.abs(elem[0] - elem[1])
 
         zero_max_diff_list.append(zero_max_diff.tolist())
         # print(zero_max_diff_list)
@@ -49,7 +53,7 @@ def dataframe_difference_calc(path_to_csv_folder, results_dir, fig_folder, plot_
 
 def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, frost_bool, input_data):
     all_data_list = []
-    fern_class_name_list = ["Fern_0", "Fern_1", "Fern_2", "Fern_3"]
+    fern_class_name_list = ["0", "1", "2", "3"]
     title_list = ["VH_Asc", "VH_Desc", "VV_Asc", "VV_Desc"]
 
     if input_data == "mean":
@@ -85,8 +89,8 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
                 df["date"] = df_list[i]["date"]
 
             # create dataframe for all meteorological spring values
-            if seasons == "spring":
-                title = title + "_" + seasons
+            if seasons == "Spring":
+                title = title + " " + seasons
                 df_season = df[(df['date'] > '2017-03-01') & (df['date'] <= '2017-05-31')
                                | (df['date'] > '2018-03-01') & (df['date'] <= '2018-05-31')
                                | (df['date'] > '2019-03-01') & (df['date'] <= '2019-05-31')
@@ -94,11 +98,11 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
 
                 # append data to dict for difference boxplots
                 if input_data == "diff":
-                    season_dict = {"spring": df_season[title_list[i]].values.tolist()}
+                    season_dict = {"Spring": df_season[title_list[i]].values.tolist()}
 
             # create dataframe for all meteorological summer values:
-            if seasons == "summer":
-                title = title + "_" + seasons
+            if seasons == "Summer":
+                title = title + " " + seasons
                 df_season = df[(df['date'] > '2016-06-01') & (df['date'] <= '2016-08-31')
                                | (df['date'] > '2017-06-01') & (df['date'] <= '2017-08-31')
                                | (df['date'] > '2018-06-01') & (df['date'] <= '2018-08-31')
@@ -107,11 +111,11 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
 
                 # append data to dict for difference boxplots
                 if input_data == "diff":
-                    season_dict["summer"] = df_season[title_list[i]].values.tolist()
+                    season_dict["Summer"] = df_season[title_list[i]].values.tolist()
 
             # create dataframe for all meteorological autumn values:
-            if seasons == "autumn":
-                title = title + "_" + seasons
+            if seasons == "Autumn":
+                title = title + " " + seasons
                 df_season = df[(df['date'] > '2016-09-01') & (df['date'] <= '2016-11-30')
                                | (df['date'] > '2017-09-01') & (df['date'] <= '2017-11-30')
                                | (df['date'] > '2018-09-01') & (df['date'] <= '2018-11-30')
@@ -120,11 +124,11 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
 
                 # append data to dict for difference boxplots
                 if input_data == "diff":
-                    season_dict["autumn"] = df_season[title_list[i]].values.tolist()
+                    season_dict["Autumn"] = df_season[title_list[i]].values.tolist()
 
             # create dataframe for all meteorological winter values:
-            if seasons == "winter":
-                title = title + "_" + seasons
+            if seasons == "Winter":
+                title = title + " " + seasons
                 df_season = df[(df['date'] > '2016-12-01') & (df['date'] <= '2017-02-28')
                                | (df['date'] > '2017-12-01') & (df['date'] <= '2018-02-28')
                                | (df['date'] > '2018-12-01') & (df['date'] <= '2019-02-28')
@@ -133,31 +137,31 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
 
                 # append data to dict for difference boxplots
                 if input_data == "diff":
-                    season_dict["winter"] = df_season[title_list[i]].values.tolist()
+                    season_dict["Winter"] = df_season[title_list[i]].values.tolist()
 
             # Plot Boxplots for all fern density classes for VH/VV/Desc/Asc and seasons:
             if input_data == "mean":
                 if "VH" in title:
-                    plt.ylim([-16, -12])
+                    plt.ylim([-15, -12])
                 if "VV" in title:
                     plt.ylim([-11, -7.5])
 
                 df_season = df_season.drop("date", axis=1)
-                # print(df_season)
                 df_melt = pd.melt(df_season)
-                df_melt = df_melt.rename(columns={'variable': 'Fern_density', 'value': 'Backscatter (dB)'})
-                # print(df_melt)
-                sns.boxplot(x="Fern_density", y="Backscatter (dB)", data=df_melt).set_title(title)
-                plt.savefig(fig_folder + "Fern_Class_Comaprison_" + title + ".png", dpi=300)
+                df_melt = df_melt.rename(columns={'variable': 'Fern Density', 'value': 'Backscatter (dB)'})
+
+                # colors = ["#179AFF", "#13F3EC", "#EFCE14", "#EE6922"]
+                sns.boxplot(x="Fern Density", y="Backscatter (dB)", data=df_melt).set_title(title)
+
+                plt.savefig(fig_folder + "Fern Class Comparison_ " + title + ".png", dpi=300, format="png")
                 plt.show()
 
         # Plot Boxplots for Zero-Max fern density difference for VH/VV/Desc/Asc and all seasons:
         if input_data == "diff":
             fig, ax = plt.subplots()
-            plt.title('Fern_density_difference: ' + title_list[i])
+            plt.title('Fern Density Difference: ' + title_list[i])
             plt.ylabel("Backscatter Difference (dB)")
             ax.boxplot(season_dict.values())
             ax.set_xticklabels(season_dict.keys())
             plt.savefig(fig_folder + "Difference_" + title_list[i] + ".png", dpi=300)
             plt.show()
-
