@@ -67,20 +67,20 @@ def mask_tif(shape_path, main_dir, results_dir):
         if polarization == "VH":
             if flight_dir == "A":
                 with rasterio.open(
-                        VH_Asc_folder + file[10:len(file)], "w", **out_meta) as dest:
+                        VH_Asc_folder + file[10:len(file)-4] + "_" + file[0:3] + ".tif", "w", **out_meta) as dest:
                     dest.write(out_image)
             if flight_dir == "D":
                 with rasterio.open(
-                        VH_Desc_folder + file[10:len(file)], "w", **out_meta) as dest:
+                        VH_Desc_folder + file[10:len(file)-4] + "_" + file[0:3] + ".tif", "w", **out_meta) as dest:
                     dest.write(out_image)
         if polarization == "VV":
             if flight_dir == "A":
                 with rasterio.open(
-                        VV_Asc_folder + file[10:len(file)], "w", **out_meta) as dest:
+                        VV_Asc_folder + file[10:len(file)-4] + "_" + file[0:3] + ".tif", "w", **out_meta) as dest:
                     dest.write(out_image)
             if flight_dir == "D":
                 with rasterio.open(
-                        VV_Desc_folder + file[10:len(file)], "w", **out_meta) as dest:
+                        VV_Desc_folder + file[10:len(file)-4] + "_" + file[0:3] + ".tif", "w", **out_meta) as dest:
                     dest.write(out_image)
     return [VH_Asc_folder, VH_Desc_folder, VV_Asc_folder, VV_Desc_folder]
 
