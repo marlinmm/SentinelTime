@@ -52,6 +52,7 @@ def dataframe_difference_calc(path_to_csv_folder, results_dir, fig_folder, plot_
 
 
 def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, frost_bool, input_data):
+    from matplotlib import rcParams
     all_data_list = []
     fern_class_name_list = ["0", "1", "2", "3"]
     title_list = ["VH_Asc", "VH_Desc", "VV_Asc", "VV_Desc"]
@@ -150,15 +151,21 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
                 df_melt = pd.melt(df_season)
                 df_melt = df_melt.rename(columns={'variable': 'Fern Density', 'value': 'Backscatter (dB)'})
 
+                rcParams['figure.figsize'] = 6, 9
                 # colors = ["#179AFF", "#13F3EC", "#EFCE14", "#EE6922"]
                 sns.boxplot(x="Fern Density", y="Backscatter (dB)", data=df_melt).set_title(title)
+                # plt.set_figheight(6)
+                # fig.set_figwidth(4)
 
                 plt.savefig(fig_folder + "Fern Class Comparison_ " + title + ".png", dpi=300, format="png")
                 plt.show()
 
         # Plot Boxplots for Zero-Max fern density difference for VH/VV/Desc/Asc and all seasons:
         if input_data == "diff":
+
             fig, ax = plt.subplots()
+            fig.set_figheight(9)
+            fig.set_figwidth(6)
             plt.title('Fern Density Difference: ' + title_list[i])
             plt.ylabel("Backscatter Difference (dB)")
             ax.boxplot(season_dict.values())
