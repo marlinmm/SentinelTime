@@ -2,6 +2,7 @@ from SentinelTime.mask_stack import *
 from SentinelTime.time_series import *
 from SentinelTime.weather_data import *
 from SentinelTime.fern_analysis.analysis_and_plots import *
+from SentinelTime.relative_orbit_calculation import *
 
 
 def main():
@@ -45,14 +46,14 @@ def main():
 
     # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
     # each class:
-    temporal_statistics(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=True,
-                        frost_bool=False)
+    # temporal_statistics(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=True,
+    #                     frost_bool=False)
 
     # dataframe_difference_calc(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder,
     #                           plot_bool=True, frost_bool=False)
 
-    # boxplots(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=False,
-    #          season=["spring", "summer", "autumn", "winter"], frost_bool=False, input_data="diff")
+    boxplots(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=False,
+             season=["Spring", "Summer", "Autumn", "Winter"], frost_bool=False, input_data="diff")
 
     # import_weather_for_fern(radar_df="")
 
@@ -63,6 +64,11 @@ def main():
     #                  station_heights=station_heights)
 
     # eliminate_nanoverlap(main_dir=main_dir, shape_path=shape_path)
+
+    # TEST!!!!!!!!!!!!!!!!!!
+    # calculate_relative_orbit_S1(absolute_orbit_number=36115, S1_satellite="A")
+    # calculate_relative_orbit_S1(absolute_orbit_number=36166, S1_satellite="A")
+    # calculate_relative_orbit_S1(absolute_orbit_number=25168, S1_satellite="B")
 
 
 if __name__ == '__main__':
