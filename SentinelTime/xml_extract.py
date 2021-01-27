@@ -3,11 +3,6 @@ from SentinelTime.data_preprocessing import *
 
 
 def xml_extract(path, file):
-    # file_list, path_list = create_overlap_file_list(path_to_folder=path_to_folder, datatype=".safe")
-
-    # Iterate through raster file list and import each file
-    # counter = 0
-    # for i, files in enumerate(file_list):
 
     root = ET.parse(path + file).getroot()
 
