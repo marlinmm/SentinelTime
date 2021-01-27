@@ -1,6 +1,7 @@
 import rasterio.mask
 import rasterio.plot
 from SentinelTime.data_preprocessing import *
+from SentinelTime.xml_extract import *
 
 
 def mask_tif(shape_path, main_dir, results_dir):
@@ -17,6 +18,14 @@ def mask_tif(shape_path, main_dir, results_dir):
         Returns list of directories, where the subsets for each polarization and flight direction are stored
     """
     file_name_list, path_list = eliminate_nanoverlap(main_dir, shape_path)
+
+    rel_orbit_number_list = []
+    for i, name in enumerate(file_name_list):
+        filename = name[0:28] + "manifest.safe"
+        path_name = path_list[i]
+        rel_orbit_number = "_" + xml_extract(path=path_name, file=filename)
+        rel_orbit_number_list.append(rel_orbit_number)
+
     shapes = import_polygons(shape_path)
 
     # Print info, what step is currently processed:
@@ -67,20 +76,24 @@ def mask_tif(shape_path, main_dir, results_dir):
         if polarization == "VH":
             if flight_dir == "A":
                 with rasterio.open(
-                        VH_Asc_folder + file[10:len(file)-4] + "_" + file[0:3] + ".tif", "w", **out_meta) as dest:
+                        VH_Asc_folder + file[10:len(file)-4] + "_" + file[0:3] + rel_orbit_number_list[i] + ".tif", "w",
+                        **out_meta) as dest:
                     dest.write(out_image)
             if flight_dir == "D":
                 with rasterio.open(
-                        VH_Desc_folder + file[10:len(file)-4] + "_" + file[0:3] + ".tif", "w", **out_meta) as dest:
+                        VH_Desc_folder + file[10:len(file)-4] + "_" + file[0:3] + rel_orbit_number_list[i] + ".tif",
+                        "w", **out_meta) as dest:
                     dest.write(out_image)
         if polarization == "VV":
             if flight_dir == "A":
                 with rasterio.open(
-                        VV_Asc_folder + file[10:len(file)-4] + "_" + file[0:3] + ".tif", "w", **out_meta) as dest:
+                        VV_Asc_folder + file[10:len(file)-4] + "_" + file[0:3] + rel_orbit_number_list[i] + ".tif", "w",
+                        **out_meta) as dest:
                     dest.write(out_image)
             if flight_dir == "D":
                 with rasterio.open(
-                        VV_Desc_folder + file[10:len(file)-4] + "_" + file[0:3] + ".tif", "w", **out_meta) as dest:
+                        VV_Desc_folder + file[10:len(file)-4] + "_" + file[0:3] + rel_orbit_number_list[i] + ".tif",
+                        "w", **out_meta) as dest:
                     dest.write(out_image)
     return [VH_Asc_folder, VH_Desc_folder, VV_Asc_folder, VV_Desc_folder]
 
