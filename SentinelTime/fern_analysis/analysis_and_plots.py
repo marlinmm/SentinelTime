@@ -4,10 +4,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def dataframe_difference_calc(path_to_csv_folder, results_dir, fig_folder, plot_bool, frost_bool):
+def dataframe_difference_calc(path_to_csv_folder, results_dir, fig_folder, plot_bool, weather_bool, frost_bool):
     all_data_list = []
     VH_Asc, VH_Desc, VV_Asc, VV_Desc, df_list = temporal_statistics(path_to_csv_folder, results_dir, fig_folder,
-                                                                    plot_bool, frost_bool)
+                                                                    plot_bool, weather_bool, frost_bool)
     all_data_list.append(VH_Asc)
     all_data_list.append(VH_Desc)
     all_data_list.append(VV_Asc)
@@ -51,7 +51,7 @@ def dataframe_difference_calc(path_to_csv_folder, results_dir, fig_folder, plot_
     return zero_max_diff_list, zero_medium_diff_list, zero_min_diff_list, df_list
 
 
-def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, frost_bool, input_data):
+def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, weather_bool, frost_bool, input_data):
     from matplotlib import rcParams
     all_data_list = []
     fern_class_name_list = ["0", "1", "2", "3"]
@@ -59,7 +59,7 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
 
     if input_data == "mean":
         VH_Asc, VH_Desc, VV_Asc, VV_Desc, df_list = temporal_statistics(path_to_csv_folder, results_dir, fig_folder,
-                                                                        plot_bool, frost_bool)
+                                                                        plot_bool, weather_bool, frost_bool)
         all_data_list.append(VH_Asc)
         all_data_list.append(VH_Desc)
         all_data_list.append(VV_Asc)
@@ -68,7 +68,7 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
 
     if input_data == "diff":
         zero_max_diff_list, zero_medium_diff_list, zero_min_diff_list, df_list = dataframe_difference_calc(
-            path_to_csv_folder, results_dir, fig_folder, plot_bool, frost_bool)
+            path_to_csv_folder, results_dir, fig_folder, plot_bool, weather_bool, frost_bool)
 
         all_data_list = zero_max_diff_list
     for i, elem in enumerate(all_data_list):
@@ -143,7 +143,7 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
             # Plot Boxplots for all fern density classes for VH/VV/Desc/Asc and seasons:
             if input_data == "mean":
                 if "VH" in title:
-                    plt.ylim([-15, -12])
+                    plt.ylim([-14.5, -12])
                 if "VV" in title:
                     plt.ylim([-11, -7.5])
 
@@ -157,7 +157,7 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
                 # plt.set_figheight(6)
                 # fig.set_figwidth(4)
 
-                plt.savefig(fig_folder + "Fern Class Comparison_ " + title + ".png", dpi=300, format="png")
+                plt.savefig(fig_folder + "Fern Class Comparison_ " + title + ".svg", dpi=300, format="svg")
                 plt.show()
 
         # Plot Boxplots for Zero-Max fern density difference for VH/VV/Desc/Asc and all seasons:
@@ -166,6 +166,8 @@ def boxplots(path_to_csv_folder, results_dir, fig_folder, plot_bool, season, fro
             fig, ax = plt.subplots()
             fig.set_figheight(9)
             fig.set_figwidth(6)
+            rcParams['axes.labelsize'] = 13
+            rcParams['axes.titlesize'] = 13
             plt.title('Fern Density Difference: ' + title_list[i])
             plt.ylabel("Backscatter Difference (dB)")
             ax.boxplot(season_dict.values())
