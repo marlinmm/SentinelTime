@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def extract_dates(directory):
+def extract_dates(directory, allowed_orbits):
     """
     Extracts dates from list of preprocessed S-1 GRD files (need to be in standard pyroSAR exported naming scheme!)
     :param directory: string
@@ -14,13 +14,18 @@ def extract_dates(directory):
         returns list of acquisition dates of S-1 GRD files
     """
     file_list = extract_files_to_list(path_to_folder=directory, datatype=".tif", path_bool=False)
+    new_file_list = []
+    for orbit in allowed_orbits:
+        for file in file_list:
+            if str(orbit) in file[len(file) - 8:len(file)]:
+                new_file_list.append(file)
     date_list = []
     for file in file_list:
         date_list.append(int(file[2:10]))
     return date_list
 
 
-def extract_time_series(results_dir, shapefile, buffer_size, point_path):
+def extract_time_series(results_dir, shapefile, buffer_size, point_path, allowed_orbits, test):
     """
     Extracts time series information from patches of pixels using points and a buffer size to specify the size of the
     patch
@@ -34,7 +39,7 @@ def extract_time_series(results_dir, shapefile, buffer_size, point_path):
         Buffer size specifies the length of the rectangular buffer around the point
     """
     # Import Patches for each class and all 4 layerstacks (VH/VV/Asc/Desc)
-    patches = create_point_buffer(shapefile, buffer_size=buffer_size)
+    patches, lon_list, lat_list, ids = create_point_buffer(shapefile, buffer_size=buffer_size)
     layer_stacks = extract_files_to_list(path_to_folder=results_dir, datatype=".tif", path_bool=True)
 
     # Iterate through all layerstacks:
@@ -49,24 +54,26 @@ def extract_time_series(results_dir, shapefile, buffer_size, point_path):
             for pixel in out_image:
                 pixel_mean.append(np.nanmean(pixel))
             patch_mean.append(pixel_mean)
-
         # Append dates of acquisition to each list (will be stored as float, doesnt matter for processing):
         if "VH" in file and "Asc" in file:
-            patch_mean.append(extract_dates(results_dir + "VH" + "/" + "Asc" + "/"))
+            patch_mean.append(extract_dates(results_dir + "VH" + "/" + "Asc" + "/", allowed_orbits))
         if "VH" in file and "Desc" in file:
-            patch_mean.append(extract_dates(results_dir + "VH" + "/" + "Desc" + "/"))
+            patch_mean.append(extract_dates(results_dir + "VH" + "/" + "Desc" + "/", allowed_orbits))
         if "VV" in file and "Asc" in file:
-            patch_mean.append(extract_dates(results_dir + "VV" + "/" + "Asc" + "/"))
+            patch_mean.append(extract_dates(results_dir + "VV" + "/" + "Asc" + "/", allowed_orbits))
         if "VV" in file and "Desc" in file:
-            patch_mean.append(extract_dates(results_dir + "VV" + "/" + "Desc" + "/"))
-
+            patch_mean.append(extract_dates(results_dir + "VV" + "/" + "Desc" + "/", allowed_orbits))
+        print(patch_mean)
         # Rotate array, so csv file will have correct orientation:
         patch_mean = np.rot90(patch_mean)
         patch_mean = np.rot90(patch_mean)
         patch_mean = np.rot90(patch_mean)
         patch_mean = patch_mean.tolist()
         src1.close()
-
+        # for i, date in enumerate(patch_mean):
+        #     patch_mean[i][0] = int(patch_mean[i][0])
+        # print(patch_mean[5][0])
+        # print(patch_mean)
         # Create CSV export directory and create header string with length equal to the number of patcher per class:
         csv_result_dir = results_dir + "CSV/"
         if not os.path.exists(csv_result_dir):
@@ -86,17 +93,18 @@ def extract_time_series(results_dir, shapefile, buffer_size, point_path):
 
         # Export patch means to csv files for each class, polarization and flight direction:
         if "VH" in file and "Asc" in file:
+            # print(patch_mean)
             np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile) - 4] + "_VH_Asc.csv",
-                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string) - 3], fmt='%f')
+                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string) - 3], fmt="%f")
         if "VH" in file and "Desc" in file:
             np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile) - 4] + "_VH_Desc.csv",
-                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string) - 3], fmt='%f')
+                       patch_mean, delimiter=",", header="date," + vh_head_string[0:len(vh_head_string) - 3], fmt="%f")
         if "VV" in file and "Asc" in file:
             np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile) - 4] + "_VV_Asc.csv",
-                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string) - 3], fmt='%f')
+                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string) - 3], fmt="%f")
         if "VV" in file and "Desc" in file:
             np.savetxt(csv_result_dir + shapefile[len(point_path):len(shapefile) - 4] + "_VV_Desc.csv",
-                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string) - 3], fmt='%f')
+                       patch_mean, delimiter=",", header="date," + vv_head_string[0:len(vv_head_string) - 3], fmt="%f")
 
 
 def import_time_series_csv(path_to_folder, frost_bool):
