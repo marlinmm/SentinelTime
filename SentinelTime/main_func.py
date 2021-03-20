@@ -10,21 +10,18 @@ def main():
     # Main directory of original raster files and/or subdirectories containing the original raster files:
     main_dir = "G:/Processed/original_data/"
 
+    # allowed relative orbits (specify in list or set to "None" for all available orbits):
+    allowed_orbits = [44, 168]
+    # allowed_orbits = None
+
     # Location of Shapefile to mask the ROI (must be polygon shapefile, simple polygon shapes are faster!):
-    # shape_path = "G:/Shapes/Polygons/new_extent.shp"
+    # shape_path = "G:/Shapes/Polygons/subset_points_extent.shp"
     shape_path = "G:/FuerMarlin_BoFEuFarnkraut/extent/fern_extent.shp"
 
     # Location of the point shapefile to extract data from time series with (must be point shapefile!):
-    # point_path = "G:/Shapes/Points"
+    # point_path = "G:/Shapes/Points/"
     point_path = "G:/FuerMarlin_BoFEuFarnkraut"
     # point_path = "G:/Shapes/Points/clc312_close_to_stations"
-
-    csv_folder = "G:/Processed/results/CSV/"
-    # csv_folder = "G:/Processed/results/AAA_Weather_Stations_2016-2019/CSV/"
-
-    fig_folder = "G:/Processed/results/Figures/"
-    if not os.path.exists(fig_folder):
-        os.mkdir(fig_folder)
 
     # Location of weatherdata in csv file format to calculate evapotranspiration:
     weather_data = "G:/Weather_data/"
@@ -34,26 +31,35 @@ def main():
     # Create results folder outside of main_dir:
     results_dir = "G:/Processed/results/"
 
+    csv_folder = results_dir + "CSV/"
+    # csv_folder = "G:/Processed/results/AAA_Weather_Stations_2016-2019/CSV/"
+
+    fig_folder = results_dir + "Figures/"
+    if not os.path.exists(fig_folder):
+        os.mkdir(fig_folder)
+
     ########################### USER-DEPENDENT FUNCTIONS TO BE USED ##########################
     # Creating a raster stack clipped to the extents of the specified shapefile:
-    # raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir, overwrite=False)
+    # raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir, overwrite=False,
+    #              allowed_orbits=[168, 44])
 
     # Extract time series information based on point shapefiles and export information to csv file:
-    # point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
-    # print(point_list)
-    # for shapefile in point_list:
-    #     extract_time_series(results_dir=results_dir, shapefile=shapefile, buffer_size=20, point_path=point_path)
+    point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
+    print(point_list)
+    for shapefile in point_list:
+        extract_time_series(results_dir=results_dir, shapefile=shapefile, buffer_size=20, point_path=point_path,
+                            allowed_orbits=allowed_orbits)
 
     # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
     # each class:
-    # temporal_statistics(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=True,
-    #                     frost_bool=False)
+    temporal_statistics(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=True,
+                        weather_bool=True, frost_bool=False)
 
     # dataframe_difference_calc(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder,
     #                           plot_bool=True, frost_bool=False)
 
-    boxplots(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=False,
-             season=["Spring", "Summer", "Autumn", "Winter"], frost_bool=False, input_data="diff")
+    # boxplots(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=False,
+    #          season=["Spring", "Summer", "Autumn", "Winter"], weather_bool=True, frost_bool=False, input_data="diff")
 
     # import_weather_for_fern(radar_df="")
 
