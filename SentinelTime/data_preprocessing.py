@@ -39,9 +39,12 @@ def import_polygons(shape_path):
     """
     active_shapefile = fiona.open(shape_path, "r")
     for i in range(0, len(list(active_shapefile))):
-        features = [feature for feature in active_shapefile]
+        # features = [feature for feature in active_shapefile]
+        # ids = [feature["id"] for feature in active_shapefile]
+        # print(features)
+        # print(ids)
         shapes = [feature["geometry"] for feature in active_shapefile]
-    return shapes
+    return shapes#, ids
 
 
 def create_shape_buffer(shape_path, buffer_size):
@@ -54,7 +57,7 @@ def create_shape_buffer(shape_path, buffer_size):
     :return: list
         Returns a list with buffered polygons around each vertex point of input polygon
     """
-    import_list = import_polygons(shape_path=shape_path)
+    import_list, ids = import_polygons(shape_path=shape_path)
     buffer_size = buffer_size / 2
     buffer_list = []
     for i in range(0, len(import_list[0]["coordinates"][0]) - 1):
@@ -83,12 +86,17 @@ def create_point_buffer(point_path, buffer_size):
     :return: list
         Returns a list with buffered polygons around each point of input polygon
     """
+    # import_list, ids = import_polygons(shape_path=point_path)
     import_list = import_polygons(shape_path=point_path)
     buffer_size = buffer_size / 2
     buffer_list = []
+    lon_list = []
+    lat_list = []
     for i in range(0, len(import_list)):
         lon = import_list[i]["coordinates"][0]
+        lon_list.append(lon)
         lat = import_list[i]["coordinates"][1]
+        lat_list.append(lat)
 
         # upper_left = (lon - buffer_size, lat + buffer_size)
         # upper_right = (lon + buffer_size, lat + buffer_size)
@@ -99,7 +107,7 @@ def create_point_buffer(point_path, buffer_size):
         buffer_coord = [[upper_left, upper_right, lower_right, lower_left, upper_left]]
         buffer = {"type": "Polygon", "coordinates": buffer_coord}
         buffer_list.append(buffer)
-    return buffer_list
+    return buffer_list#, lon_list, lat_list, ids
 
 
 def create_buffer(lat, lon, buffer_size):
