@@ -98,7 +98,7 @@ def mask_tif(shape_path, main_dir, results_dir):
     return [VH_Asc_folder, VH_Desc_folder, VV_Asc_folder, VV_Desc_folder]
 
 
-def raster_stack(shape_path, main_dir, results_dir, overwrite):
+def raster_stack(shape_path, main_dir, results_dir, overwrite, allowed_orbits):
     """
     This function stacks the clipped raster files to one raster time series stack for each polarization and flight
     direction
@@ -117,12 +117,19 @@ def raster_stack(shape_path, main_dir, results_dir, overwrite):
 
     for folder in result_folder:
         file_list = extract_files_to_list(path_to_folder=folder, datatype=".tif", path_bool=True)
+
+        new_file_list = []
+        for orbit in allowed_orbits:
+            for file in file_list:
+                if str(orbit) in file[len(file)-8:len(file)]:
+                    new_file_list.append(file)
+
         # Read metadata of first file
-        with rasterio.open(file_list[0]) as src0:
+        with rasterio.open(new_file_list[0]) as src0:
             meta = src0.meta
 
         # Update meta to reflect the number of layers
-        meta.update(count=len(file_list))
+        meta.update(count=len(new_file_list))
 
         # Read each layer and write it to stack
         if "VH" in folder and "Asc" in folder:
@@ -142,6 +149,6 @@ def raster_stack(shape_path, main_dir, results_dir, overwrite):
 
         # Write rasterstacks for all polarizations and flight directions:
         with rasterio.open(results_dir + stack_name, 'w', **meta) as dst:
-            for i, layer in enumerate(file_list, start=1):
+            for i, layer in enumerate(new_file_list, start=1):
                 with rasterio.open(layer) as src1:
                     dst.write_band(i, src1.read(1))
