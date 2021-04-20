@@ -15,12 +15,12 @@ def main():
     # allowed_orbits = None
 
     # Location of Shapefile to mask the ROI (must be polygon shapefile, simple polygon shapes are faster!):
-    # shape_path = "G:/Shapes/Polygons/subset_points_extent.shp"
+    # shape_path = "G:/Shapes/Polygons/new_extent.shp"
     shape_path = "G:/FuerMarlin_BoFEuFarnkraut/extent/fern_extent.shp"
 
     # Location of the point shapefile to extract data from time series with (must be point shapefile!):
     # point_path = "G:/Shapes/Points/"
-    point_path = "G:/FuerMarlin_BoFEuFarnkraut"
+    point_path = "G:/FuerMarlin_BoFEuFarnkraut/Farnkraut_single_points"
     # point_path = "G:/Shapes/Points/clc312_close_to_stations"
 
     # Location of weatherdata in csv file format to calculate evapotranspiration:
@@ -34,40 +34,44 @@ def main():
     csv_folder = results_dir + "CSV/"
     # csv_folder = "G:/Processed/results/AAA_Weather_Stations_2016-2019/CSV/"
 
-    fig_folder = results_dir + "Figures/"
+    # fig_folder = results_dir + "Figures/"
+    fig_folder = "C:/Users/marli/Google Drive/Studium/HiWi-Job_FSU/AAA_ISPRS_Paper_2021/Text/Paper/Abbildungen/"
     if not os.path.exists(fig_folder):
         os.mkdir(fig_folder)
 
     ########################### USER-DEPENDENT FUNCTIONS TO BE USED ##########################
     # Creating a raster stack clipped to the extents of the specified shapefile:
     # raster_stack(shape_path=shape_path, main_dir=main_dir, results_dir=results_dir, overwrite=False,
-    #              allowed_orbits=[168, 44])
+    #              allowed_orbits=None)
 
     # Extract time series information based on point shapefiles and export information to csv file:
-    point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
-    print(point_list)
-    for shapefile in point_list:
-        extract_time_series(results_dir=results_dir, shapefile=shapefile, buffer_size=20, point_path=point_path,
-                            allowed_orbits=allowed_orbits)
+    # point_list = extract_files_to_list(path_to_folder=point_path, datatype=".shp", path_bool=True)
+    # # print(point_list)
+    # for shapefile in point_list:
+    #     extract_time_series(results_dir=results_dir, shapefile=shapefile, buffer_size=20, point_path=point_path,
+    #                         allowed_orbits=allowed_orbits)
 
     # Extract temporal statistics from time series with possibility to plot Mean and Std.Dev. values of time series for
     # each class:
-    temporal_statistics(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=True,
-                        weather_bool=True, frost_bool=False)
+    # temporal_statistics(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=True,
+    #                     weather_bool=True, frost_bool=False)
 
     # dataframe_difference_calc(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder,
     #                           plot_bool=True, frost_bool=False)
 
-    # boxplots(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=False,
-    #          season=["Spring", "Summer", "Autumn", "Winter"], weather_bool=True, frost_bool=False, input_data="diff")
+    boxplots(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder, plot_bool=False,
+             season=["Spring", "Summer", "Autumn", "Winter"], weather_bool=True, frost_bool=False, input_data="diff")
 
     # import_weather_for_fern(radar_df="")
+
+    # singlepixel_vs_multipixel(path_to_csv_folder=csv_folder, results_dir=results_dir, fig_folder=fig_folder,
+    #                           plot_bool=False, weather_bool=False, frost_bool=False)
 
     # Calculate VH/VV Ratio for each class and flight direction:
     # ratio_calc(path_to_folder=results_dir, plot_bool=True, frost_bool=False)
 
     # clean_weather_df(path_to_weather_folder=weather_data, path_to_csv_folder=csv_folder,
-    #                  station_heights=station_heights)
+    #                  station_heights=station_heights, frost_bool=True)
 
     # eliminate_nanoverlap(main_dir=main_dir, shape_path=shape_path)
 
