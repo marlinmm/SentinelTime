@@ -119,9 +119,14 @@ def raster_stack(shape_path, main_dir, results_dir, overwrite, allowed_orbits):
         file_list = extract_files_to_list(path_to_folder=folder, datatype=".tif", path_bool=True)
 
         new_file_list = []
-        for orbit in allowed_orbits:
+        if allowed_orbits is not None:
+            for orbit in allowed_orbits:
+                for file in file_list:
+                    if str(orbit) in file[len(file)-8:len(file)]:
+                        new_file_list.append(file)
+        if allowed_orbits is None:
             for file in file_list:
-                if str(orbit) in file[len(file)-8:len(file)]:
+                if str(orbit) in file[len(file) - 8:len(file)]:
                     new_file_list.append(file)
 
         # Read metadata of first file
