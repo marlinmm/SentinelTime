@@ -15,7 +15,7 @@ def extract_dates(directory, allowed_orbits=None):
     """
     file_list = extract_files_to_list(path_to_folder=directory, datatype=".tif", path_bool=False)
     new_file_list = []
-    print(allowed_orbits)
+    # print(allowed_orbits)
     if allowed_orbits is not None:
         for orbit in allowed_orbits:
             for file in file_list:
@@ -26,10 +26,10 @@ def extract_dates(directory, allowed_orbits=None):
             date_list.append(int(file[2:10]))
     elif allowed_orbits is None:
         date_list = []
-        print("aaa")
+        # print("aaa")
         for file in file_list:
             date_list.append(int(file[2:10]))
-    print(len(date_list))
+    # print(len(date_list))
     return date_list
 
 
@@ -63,7 +63,7 @@ def extract_time_series(results_dir, shapefile, buffer_size, point_path, allowed
             for pixel in out_image:
                 pixel_mean.append(np.nanmean(pixel))
             patch_mean.append(pixel_mean)
-        print(len(patch_mean[0]))
+        # print(len(patch_mean[0]))
         # Append dates of acquisition to each list (will be stored as float, doesnt matter for processing):
         if "VH" in file and "Asc" in file:
             patch_mean.append(extract_dates(results_dir + "VH" + "/" + "Asc" + "/", allowed_orbits))
@@ -79,6 +79,11 @@ def extract_time_series(results_dir, shapefile, buffer_size, point_path, allowed
         patch_mean = np.rot90(patch_mean)
         patch_mean = np.rot90(patch_mean)
         patch_mean = patch_mean.tolist()
+        # print(patch_mean)
+
+        # TIME SERIES REDUCTION
+        # patch_mean = patch_mean[::4]
+
         src1.close()
 
         # Create CSV export directory and create header string with length equal to the number of patcher per class:
@@ -125,6 +130,7 @@ def import_time_series_csv(path_to_folder, frost_bool):
     csv_list = extract_files_to_list(path_to_folder, datatype=".csv", path_bool=False)
     df_name_list = []
     df_list = []
+    print(csv_list)
     for csv in csv_list:
         df = pd.read_csv(path_to_folder + csv)
         df = df.rename({"# date": "date"}, axis=1)
@@ -161,7 +167,7 @@ def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, 
     import csv
     from scipy.ndimage.filters import gaussian_filter1d
     df_name_list, df_list, weather = import_time_series_csv(path_to_csv_folder, frost_bool)
-    print(df_name_list)
+    # print(df_name_list)
     statistics_dict = {}
     # print(df_name_list)
 
@@ -184,7 +190,7 @@ def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, 
         statistics_dict[df_name_list[i]]["Temporal Min."] = round(df["patches_mean"].min(), 3)
         statistics_dict[df_name_list[i]]["Temporal Amp."] = round(df["patches_mean"].max()
                                                                   - df["patches_mean"].min(), 3)
-    print(statistics_dict)
+    # print(statistics_dict)
     dataframe_list1 = []
     dataframe_list2 = []
     dataframe_list3 = []
@@ -230,16 +236,18 @@ def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, 
                         title = str(df_name_list[tmp][:df_name_list[tmp].find("VV") - 1])
                     if "VH" in df_name_list[tmp]:
                         title = str(df_name_list[tmp][:df_name_list[tmp].find("VH") - 1])
-                    plt.title('Mean of all Patches for class: ' + title)
+                    plt.title('Mean of all Patches for ' + title)
                 if k == 1:
                     # ax1.figure(figsize=(16, 9))
                     plt.title('Std.Dev. of all Patches for class: ' + str(df_name_list[tmp][0:17]))
-                ax1.plot('date', elem, data=df_list[tmp], marker='', color='k', linewidth=0.7, label="")
-                ax1.plot('date', elem, data=df_list[tmp + 1], marker='', color='forestgreen', linewidth=0.7, label="")
+                ax1.plot('date', elem, data=df_list[tmp], marker='', color='k', linewidth=0.5, label="")
+                # ax1.plot('date', elem, data=df_list[tmp + 1], marker='', color='forestgreen', linewidth=0.7, label="")
+                ax1.plot('date', elem, data=df_list[tmp + 1], marker='', color='k', linewidth=0.5, label="", linestyle='dashed')
                 # print(df_name_list[tmp + 3])
                 # print(df_name_list[tmp + 2])
-                ax1.plot('date', elem, data=df_list[tmp + 2], marker='', color='b', linewidth=0.7, label="")
-                ax1.plot('date', elem, data=df_list[tmp + 3], marker='', color='firebrick', linewidth=0.7, label="")
+                ax1.plot('date', elem, data=df_list[tmp + 2], marker='', color='b', linewidth=0.5, label="")
+                # ax1.plot('date', elem, data=df_list[tmp + 3], marker='', color='firebrick', linewidth=0.7, label="")
+                ax1.plot('date', elem, data=df_list[tmp + 3], marker='', color='b', linewidth=0.5, label="", linestyle='dashed')
 
             # filter time series using gaussian filter:
             arr1 = gaussian_filter1d(df_list[tmp]["patches_mean"].to_numpy(), sigma=2)
@@ -248,6 +256,7 @@ def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, 
             arr4 = gaussian_filter1d(df_list[tmp + 3]["patches_mean"].to_numpy(), sigma=2)
 
             # append filtered datasets to lists for further use:
+            # print(dataframe_list2)
             dataframe_list1.append(arr1)
             dataframe_list2.append(arr2)
             dataframe_list3.append(arr3)
@@ -260,17 +269,20 @@ def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, 
                 if "VV" in df_name_list[tmp]:
                     start_index = df_name_list[tmp].find("VV")
 
-
-                ax1.plot(df_list[tmp]['date'], arr1, marker='', color='k', linewidth=3,
+                ax1.plot(df_list[tmp]['date'], arr1, marker='', color='k', linewidth=2.5, linestyle='dashed',
                          label=df_name_list[tmp][start_index:])
 
-                ax1.plot(df_list[tmp + 1]['date'], arr2, marker='', color='forestgreen', linewidth=3,
-                         label=df_name_list[tmp + 1][start_index:])
+                # ax1.plot(df_list[tmp + 1]['date'], arr2, marker='', color='forestgreen', linewidth=3,
+                #          linestyle='solid', label=df_name_list[tmp + 1][start_index:])
+                ax1.plot(df_list[tmp + 1]['date'], arr2, marker='', color='k', linewidth=2.5,
+                         linestyle='solid', label=df_name_list[tmp + 1][start_index:])
 
-                ax1.plot(df_list[tmp + 2]['date'], arr3, marker='', color='b', linewidth=3,
+                ax1.plot(df_list[tmp + 2]['date'], arr3, marker='', color='b', linewidth=2.5, linestyle='dashed',
                          label=df_name_list[tmp + 2][start_index:])
 
-                ax1.plot(df_list[tmp + 3]['date'], arr4, marker='', color='firebrick', linewidth=3,
+                # ax1.plot(df_list[tmp + 3]['date'], arr4, marker='', color='firebrick', linewidth=3, linestyle='solid',
+                #          label=df_name_list[tmp + 3][start_index:])
+                ax1.plot(df_list[tmp + 3]['date'], arr4, marker='', color='b', linewidth=2.5, linestyle='solid',
                          label=df_name_list[tmp + 3][start_index:])
 
                 # TODO: make weather data stuff optional!!!!
@@ -290,12 +302,19 @@ def temporal_statistics(path_to_csv_folder, results_dir, fig_folder, plot_bool, 
                     print(weather)
 
                     ax2.plot(weather['date'], weather['precip'], color="silver")
+                    print("Precip.:")
+                    print(np.mean(weather["precip"]))
+                    print(len(weather["precip"]))
+                    print(np.sum(weather["precip"]))
                     # plt.ylabel("Precipitation (mm)")
                     ax2.set_ylabel('Precipitation (mm)', color="silver", loc='bottom')
                     # plt.ylim((-10, 50))
                     ax2.set_ylim(-10, 110)
 
                     ax3.plot(weather['date'], weather['temp'], color="orange")
+                    print("Temp.:")
+                    print(np.mean(weather["temp"]))
+                    print(np.median(weather["temp"]))
                     # plt.ylabel("Precipitation (mm)")
                     ax3.set_ylabel('Avg_Temp (°C)', color="orange", loc='bottom')
                     # plt.ylim((-10, 110))
