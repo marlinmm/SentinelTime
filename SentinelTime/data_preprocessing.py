@@ -57,7 +57,7 @@ def create_shape_buffer(shape_path, buffer_size):
     :return: list
         Returns a list with buffered polygons around each vertex point of input polygon
     """
-    import_list, ids = import_polygons(shape_path=shape_path)
+    import_list = import_polygons(shape_path=shape_path)
     buffer_size = buffer_size / 2
     buffer_list = []
     for i in range(0, len(import_list[0]["coordinates"][0]) - 1):
