@@ -6,7 +6,7 @@ def import_weather_csv(path_to_weather_folder):
     """
     import pandas as pd
     csv_list = data_preprocessing.extract_files_to_list(path_to_weather_folder, datatype=".csv", path_bool=False)
-    #df_name_list = data_preprocessing.extract_files_to_list(path_to_weather_folder, datatype=".csv", path_bool=True)
+    # df_name_list = data_preprocessing.extract_files_to_list(path_to_weather_folder, datatype=".csv", path_bool=True)
     df_list = []
     for csv in csv_list:
         df = pd.read_csv(path_to_weather_folder + csv, sep=";", decimal=',')
@@ -49,7 +49,7 @@ def calc_evapotranspiration(path_to_weather_folder, station_heights):
     return df_list, df_name_list
 
 
-def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights):
+def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights, frost_bool):
     import pandas as pd
     import numpy as np
     import matplotlib.pyplot as plt
@@ -60,9 +60,14 @@ def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights
 
     weather_df, df_name_list = calc_evapotranspiration(path_to_weather_folder, station_heights)
 
-    sentinel_dfs = time_series.import_time_series_csv(path_to_csv_folder)
+    sentinel_dfs = time_series.import_time_series_csv(path_to_csv_folder, frost_bool)
 
     r_squared_list = []
+
+    patches_list = []
+    etc_list = []
+    pol_list = []
+    station_name_list = []
 
     for i, weather_data in enumerate(weather_df):
         # print(df_name_list[i])
@@ -85,11 +90,12 @@ def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights
 
             combine = pd.merge(tmp_sen_df, ETc_df, on='date')
             all_temp_combine = combine
-            combine = combine.query("t_min >= -1")
-            combine = combine.reset_index(drop=True)
-            print(combine)
+            if frost_bool:
+                combine = combine.query("t_min >= -1")
+                combine = combine.reset_index(drop=True)
+            # print(combine)
             kernel = 5
-            kernel_half = kernel//2
+            kernel_half = kernel // 2
 
             # Mean - Filter:
             kernel = (1 / float(kernel)) * np.ones(kernel)
@@ -109,15 +115,29 @@ def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights
             # etc_filt = gaussian_filter1d(combine['ETc'].to_numpy(), sigma=1.5)
 
             # use the function regplot to make a scatterplot
-            sns.regplot(x=patches_filt, y=etc_filt, fit_reg=False)
+            figu, ax0 = plt.subplots()
+            figu.set_figheight(9)
+            figu.set_figwidth(21)
+            sns.regplot(x=patches_filt, y=etc_filt, fit_reg=False, ax=ax0, color="black")
+            ax0.set_xlabel('Backscatter (dB)', fontsize=20)
+            ax0.set_ylabel('ETc', fontsize=20)
+            ax0.tick_params(axis='both', labelsize=14)
 
-            print(sentinel_dfs[0][j])
+            patches_list.append(patches_filt)
+            etc_list.append(etc_filt)
+
+            # print(sentinel_dfs[0][j])
 
             fig, ax1 = plt.subplots()
             part1 = df_name_list[i][0:len(df_name_list[i])-4]
-            print(part1)
+            new_part1 = part1[11:len(part1)-4] + "_"
+            station_name_list.append(new_part1)
             part2 = sentinel_dfs[0][j][len(sentinel_dfs[0][j])-7:len(sentinel_dfs[0][j])]
-            print(part2)
+            new_part2 = part2
+            if new_part2[0] == "_":
+                new_part2 = part2[1:]
+            pol_list.append(new_part2)
+            # print(part2)
             ax1.set_title(part1 + " " + part2, fontsize=28)
             fig.set_figheight(9)
             fig.set_figwidth(21)
@@ -125,24 +145,52 @@ def clean_weather_df(path_to_weather_folder, path_to_csv_folder, station_heights
             ax1.set_xlabel('Time', fontsize=20)
             ax1.set_ylabel('Mean Backscatter', color=color, fontsize=20)
             ax1.plot(combine['date'][kernel_half:len(combine['date'])-kernel_half], patches_filt, color=color, linewidth=2)
-            ax1.tick_params(axis='y', labelcolor=color)
+            ax1.tick_params(axis='y', labelsize=14, labelcolor=color)
+            ax1.tick_params(axis='x', labelsize=14)
 
             ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
             color = 'tab:blue'
             ax2.set_ylabel('ETc', color=color, fontsize=20)  # we already handled the x-label with ax1
             ax2.plot(combine['date'][kernel_half:len(combine['date'])-kernel_half], etc_filt, color=color, linewidth=2)
-            ax2.tick_params(axis='y', labelcolor=color)
-
+            ax2.tick_params(axis='y', labelsize=14, labelcolor=color)
+            # plt.xticks(fontsize=14, rotation=90)
             fig.tight_layout()  # otherwise the right y-label is slightly clipped
             plt.show()
 
             slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(combine["patches_mean"], y=combine["ETc"])
             r_squared_list.append(r_value ** 2)
-            print(j)
+            # print(j)
             tmp = tmp + 1
             if tmp == 4:
                 break
+
+    print(len(patches_list))
+    print(len(etc_list))
+    print(pol_list)
+    print(station_name_list)
+
+
+    # for i in range(0,4):
+    #     fig, ax3 = plt.subplots()
+    #     fig.set_figheight(6)
+    #     fig.set_figwidth(8)
+    #     sns.regplot(x=patches_list[0+i], y=etc_list[0+i], fit_reg=False, ax=ax3, scatter_kws={'s': 6, 'color': "k"},
+    #                 label=station_name_list[0+i] + pol_list[0+i])
+    #     print(pol_list[0+i])
+    #     sns.regplot(x=patches_list[4+i], y=etc_list[4+i], fit_reg=False, ax=ax3,
+    #                 scatter_kws={'s': 6, 'color': "forestgreen"}, label=station_name_list[4+i] + pol_list[4+i])
+    #     print(pol_list[4 + i])
+    #     sns.regplot(x=patches_list[8+i], y=etc_list[8+i], fit_reg=False, ax=ax3, scatter_kws={'s': 6, 'color': "b"},
+    #                 label=station_name_list[8+i] + pol_list[8+i])
+    #     print(pol_list[8 + i])
+    #     sns.regplot(x=patches_list[12+i], y=etc_list[12+i], fit_reg=False, ax=ax3,
+    #                 scatter_kws={'s': 6, 'color': "firebrick"}, label=station_name_list[0+i] + pol_list[12+i])
+    #     print(pol_list[12 + i])
+    #     plt.xlabel("Backscatter (dB)")
+    #     plt.ylabel("ETc")
+    #     plt.legend(loc='upper left')
+    # plt.show()
 
     print(len(r_squared_list))
     print(r_squared_list)
